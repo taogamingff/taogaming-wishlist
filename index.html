@@ -162,7 +162,7 @@
     padding:13px 22px;border-radius:13px;font-size:13px;font-weight:700;
     opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;
     z-index:9999;box-shadow:0 14px 34px rgba(0,0,0,.55);
-    max-width:90vw;text-align:center;
+    max-width:90vw;text-align:center;word-break:break-word;
   }
   #toast.show{opacity:1;transform:translate(-50%,0)}
   #toast.err{background:#2a1220;border-color:#5a2136;color:#ff8fa3}
@@ -171,7 +171,7 @@
 </head>
 <body>
 
-<!-- TRANG 1 -->
+<!-- ================= TRANG 1 ================= -->
 <section id="page-login" class="page active">
   <div class="auth">
     <div class="brand-badge">🔰</div>
@@ -218,10 +218,6 @@
         <label for="loginEndpointInput">Endpoint đăng nhập <span class="optional">(tùy chọn)</span></label>
         <input id="loginEndpointInput" type="text" placeholder="/login" autocomplete="off" />
       </div>
-      <div class="field" style="margin-bottom:6px">
-        <label for="proxyInput">Proxy URL <span class="optional">(mặc định: cùng domain)</span></label>
-        <input id="proxyInput" type="text" placeholder="" autocomplete="off" />
-      </div>
     </div>
 
     <button class="btn primary block" id="btnLogin" type="button">ĐĂNG NHẬP WISHLIST</button>
@@ -229,7 +225,7 @@
   </div>
 </section>
 
-<!-- TRANG 2 -->
+<!-- ================= TRANG 2 ================= -->
 <section id="page-manager" class="page">
   <div class="shell">
     <div class="topbar">
@@ -289,14 +285,14 @@
 (function () {
   'use strict';
 
-  /* Cấu hình */
+  /* ==================== CẤU HÌNH ==================== */
   var ICON_BASE = 'https://kingofgames02.github.io/Free-Fire-Items-Library/ff-icons/';
   var MAX_ITEMS = 100;
   var ID_REGEX  = /^\d{5,12}$/;
   var PARSE_REGEX = /\d{5,12}/g;
-  var SESSION_KEY = 'danger_wishlist_v5';
+  var SESSION_KEY = 'danger_wishlist_v6';
 
-  /* DOM */
+  /* ==================== DOM ==================== */
   var $ = function(s){ return document.querySelector(s); };
   var pageLogin   = $('#page-login');
   var pageManager = $('#page-manager');
@@ -307,27 +303,46 @@
   var advToggle = $('#advToggle'), advBody = $('#advBody');
   var syncEndpointInput = $('#syncEndpointInput');
   var loginEndpointInput = $('#loginEndpointInput');
-  var proxyInput = $('#proxyInput');
   var addInput = $('#addInput'), addPreview = $('#addPreview'), btnAdd = $('#btnAdd');
   var removeInput = $('#removeInput'), removePreview = $('#removePreview'), btnRemove = $('#btnRemove');
   var gridEl = $('#grid'), emptyEl = $('#empty'), countEl = $('#countItems'), btnRefresh = $('#btnRefresh');
   var statusDot = $('#statusDot'), statusText = $('#statusText'), statusToken = $('#statusToken');
 
-  /* State */
+  /* ==================== STATE ==================== */
   var state = {
     uid: '', password: '', token: '', items: [],
-    syncEndpoint: '', loginEndpoint: '', proxy: ''
+    syncEndpoint: '', loginEndpoint: ''
   };
   var toastTimer = null;
   var syncing = false;
 
-  /* Tiện ích */
+  /* ==================== TIỆN ÍCH ==================== */
+
+  /* ĐÂY LÀ HÀM FIX [object Object] */
+  function toSafeString(v) {
+    if (v === null || v === undefined) return '';
+    if (typeof v === 'string') return v;
+    if (typeof v === 'number' || typeof v === 'boolean') return String(v);
+    if (v instanceof Error) return v.message || 'Error';
+    if (typeof v === 'object') {
+      if (typeof v.message === 'string') return v.message;
+      if (typeof v.error === 'string') return v.error;
+      if (typeof v.msg === 'string') return v.msg;
+      try {
+        var s = JSON.stringify(v);
+        if (s && s !== '{}' && s !== '[]') return s;
+      } catch (e) {}
+      return 'Lỗi không xác định';
+    }
+    return String(v);
+  }
+
   function toast(msg, type){
     var t = $('#toast');
-    t.textContent = msg;
+    t.textContent = toSafeString(msg);
     t.className = 'show' + (type ? ' '+type : '');
     clearTimeout(toastTimer);
-    toastTimer = setTimeout(function(){ t.className=''; }, 3200);
+    toastTimer = setTimeout(function(){ t.className=''; }, 3500);
   }
 
   function parseIds(raw){
@@ -341,14 +356,15 @@
   }
   function isId(v){ return typeof v==='string' && ID_REGEX.test(v); }
 
-  /** URL gốc của proxy: ưu tiên ô nhập, sau đó cùng origin */
   function proxyBase(){
-    var p = (state.proxy || '').trim();
-    if(p) return p.replace(/\/$/, '');
-    return window.location.origin;
+    var origin = window.location.origin;
+    if(!origin || origin === 'null' || origin.indexOf('file://') === 0){
+      return 'http://localhost:3000';
+    }
+    return origin;
   }
 
-  /* Lưu trữ */
+  /* ==================== LƯU TRỮ ==================== */
   function keyFor(uid){ return 'dw_items_' + (uid || 'anon'); }
   function persist(){ try{ localStorage.setItem(keyFor(state.uid), JSON.stringify(state.items)); }catch(e){} }
   function loadItems(uid){
@@ -361,8 +377,7 @@
     try{
       localStorage.setItem(SESSION_KEY, JSON.stringify({
         uid: state.uid, password: state.password, token: state.token,
-        syncEndpoint: state.syncEndpoint, loginEndpoint: state.loginEndpoint,
-        proxy: state.proxy
+        syncEndpoint: state.syncEndpoint, loginEndpoint: state.loginEndpoint
       }));
     }catch(e){}
   }
@@ -371,27 +386,25 @@
   }
   function clearSession(){ try{ localStorage.removeItem(SESSION_KEY); }catch(e){} }
 
-  /* Gọi proxy */
-  function apiCall(endpoint, payload, method){
-    method = method || 'POST';
+  /* ==================== GỌI PROXY ==================== */
+  function apiCall(endpoint, payload){
     var url = proxyBase() + endpoint;
     return fetch(url, {
-      method: method,
+      method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-      body: method === 'POST' ? JSON.stringify(payload) : undefined
+      body: JSON.stringify(payload || {})
     })
     .then(function(r){
       return r.text().then(function(txt){
         var data;
         try{ data = JSON.parse(txt); }catch(e){ data = { raw: txt }; }
-        return { ok: r.ok, status: r.status, data: data };
+        return { httpOk: r.ok, status: r.status, data: data };
       });
     });
   }
 
-  /* Cập nhật status bar */
   function updateStatus(text, mode){
-    statusText.textContent = text;
+    statusText.textContent = toSafeString(text);
     statusDot.className = 'dot';
     if(mode === 'online') statusDot.classList.add('on');
     else if(mode === 'offline') statusDot.classList.add('off');
@@ -408,7 +421,7 @@
     }
   }
 
-  /* Render */
+  /* ==================== RENDER ==================== */
   function createCard(id){
     var el = document.createElement('div');
     el.className = 'item';
@@ -461,7 +474,7 @@
     gridEl.appendChild(frag);
   }
 
-  /* Đồng bộ từ server */
+  /* ==================== ĐỒNG BỘ WISHLIST ==================== */
   function syncFromServer(showToast){
     if(syncing) return;
     syncing = true;
@@ -475,28 +488,30 @@
     apiCall('/api/wishlist', payload)
       .then(function(r){
         syncing = false;
-        if(r.ok && r.data && r.data.success){
+        if(r.httpOk && r.data && r.data.success){
           state.items = (r.data.items || []).slice(0, MAX_ITEMS);
           persist(); render();
-          updateStatus('Đã đồng bộ ' + state.items.length + ' item (' + r.data.via + ')', 'online');
+          updateStatus('Đã đồng bộ ' + state.items.length + ' item (' + toSafeString(r.data.via) + ')', 'online');
           if(showToast) toast('Đã tải ' + state.items.length + ' item từ server ✓', 'ok');
         }else{
-          var msg = (r.data && r.data.error) || 'Không lấy được wishlist';
+          var msg = r.data && r.data.error
+            ? toSafeString(r.data.error)
+            : ('HTTP ' + r.status + ' — không lấy được wishlist');
           updateStatus('Lỗi: ' + msg, 'offline');
           if(showToast) toast(msg, 'err');
-          // Thử hiển thị cache
           state.items = loadItems(state.uid); render();
         }
       })
       .catch(function(err){
         syncing = false;
-        updateStatus('Không kết nối proxy (' + err.message + ')', 'offline');
-        if(showToast) toast('Không kết nối được proxy — kiểm tra server.js đã chạy chưa', 'err');
+        var msg = toSafeString(err);
+        updateStatus('Không kết nối proxy: ' + msg, 'offline');
+        if(showToast) toast('Không kết nối proxy: ' + msg, 'err');
         state.items = loadItems(state.uid); render();
       });
   }
 
-  /* Thêm / Xóa */
+  /* ==================== THÊM ==================== */
   function handleAdd(){
     var ids = parseIds(addInput.value);
     if(!ids.length){ toast('Không nhận dạng được ID hợp lệ', 'err'); addInput.focus(); return; }
@@ -505,27 +520,37 @@
     if(state.items.length + fresh.length > MAX_ITEMS){ toast('Tối đa ' + MAX_ITEMS, 'err'); return; }
 
     btnAdd.disabled = true;
+    toast('Đang thêm ' + fresh.length + ' item...');
 
-    // Gọi proxy thêm
     var params = { path: '/add-wish', item_ids: fresh.join(',') };
     if(state.token) params.token = state.token;
     else { params.uid = state.uid; params.password = state.password; }
 
-    var url = proxyBase() + '/proxy?' + new URLSearchParams(params).toString();
+    var url = proxyBase() + '/api/proxy?' + new URLSearchParams(params).toString();
 
-    fetch(url).then(function(r){ return r.json(); })
-      .then(function(res){
-        if(res.ok){
+    fetch(url)
+      .then(function(r){
+        return r.text().then(function(txt){
+          var data;
+          try{ data = JSON.parse(txt); }catch(e){ data = { raw: txt }; }
+          return { httpOk: r.ok, status: r.status, data: data };
+        });
+      })
+      .then(function(result){
+        if(result.httpOk && result.data && result.data.ok){
           toast('Đã thêm ' + fresh.length + ' item ✓', 'ok');
-          // Cập nhật UI + reload từ server
-          state.items = state.items.concat(fresh); persist(); render();
+          state.items = state.items.concat(fresh);
+          persist(); render();
           syncFromServer(false);
         }else{
-          toast('API lỗi (' + res.status + '): ' + JSON.stringify(res.data).slice(0,100), 'err');
+          var errMsg = result.data && (result.data.error || result.data.data)
+            ? toSafeString(result.data.error || result.data.data)
+            : ('HTTP ' + result.status);
+          toast('Lỗi thêm: ' + errMsg.slice(0, 160), 'err');
         }
       })
       .catch(function(err){
-        toast('Lỗi proxy: ' + err.message, 'err');
+        toast('Lỗi kết nối: ' + toSafeString(err), 'err');
       })
       .then(function(){
         btnAdd.disabled = false;
@@ -533,6 +558,7 @@
       });
   }
 
+  /* ==================== XÓA ==================== */
   function handleRemove(){
     var ids = parseIds(removeInput.value);
     if(!ids.length){ toast('Không nhận dạng được ID hợp lệ', 'err'); removeInput.focus(); return; }
@@ -550,22 +576,34 @@
     if(state.token) params.token = state.token;
     else { params.uid = state.uid; params.password = state.password; }
 
-    var url = proxyBase() + '/proxy?' + new URLSearchParams(params).toString();
+    var url = proxyBase() + '/api/proxy?' + new URLSearchParams(params).toString();
 
-    toast('Đang xóa...');
+    toast('Đang xóa ' + exist.length + ' item...');
 
-    fetch(url).then(function(r){ return r.json(); })
-      .then(function(res){
-        if(res.ok){
+    fetch(url)
+      .then(function(r){
+        return r.text().then(function(txt){
+          var data;
+          try{ data = JSON.parse(txt); }catch(e){ data = { raw: txt }; }
+          return { httpOk: r.ok, status: r.status, data: data };
+        });
+      })
+      .then(function(result){
+        if(result.httpOk && result.data && result.data.ok){
           toast('Đã xóa ' + exist.length + ' item ✓', 'ok');
           state.items = state.items.filter(function(id){ return exist.indexOf(id)===-1; });
           persist(); render();
           syncFromServer(false);
         }else{
-          toast('API lỗi: ' + JSON.stringify(res.data).slice(0,100), 'err');
+          var errMsg = result.data && (result.data.error || result.data.data)
+            ? toSafeString(result.data.error || result.data.data)
+            : ('HTTP ' + result.status);
+          toast('Lỗi xóa: ' + errMsg.slice(0, 160), 'err');
         }
       })
-      .catch(function(err){ toast('Lỗi proxy: ' + err.message, 'err'); });
+      .catch(function(err){
+        toast('Lỗi kết nối: ' + toSafeString(err), 'err');
+      });
   }
 
   function updatePreview(input, previewEl){
@@ -576,7 +614,7 @@
     previewEl.textContent = '✓ Nhận dạng ' + ids.length + ' ID: ' + show;
   }
 
-  /* Điều hướng */
+  /* ==================== ĐIỀU HƯỚNG ==================== */
   function showLogin(){
     pageManager.classList.remove('active');
     pageLogin.classList.add('active');
@@ -591,18 +629,15 @@
     window.scrollTo(0,0);
   }
 
-  /* LOGIN */
+  /* ==================== LOGIN ==================== */
   function doLogin(){
     var uid = uidInput.value.trim();
     var pwd = pwdInput.value.trim();
     var manualToken = tokenInput.value.trim();
 
-    // Lưu cấu hình
     state.syncEndpoint  = syncEndpointInput.value.trim();
     state.loginEndpoint = loginEndpointInput.value.trim();
-    state.proxy         = proxyInput.value.trim();
 
-    // 1. Có JWT dán sẵn
     if(manualToken){
       state.token = manualToken;
       state.uid = uid || 'guest';
@@ -614,7 +649,6 @@
       return;
     }
 
-    // 2. Cần uid/password
     if(!uid){ toast('Vui lòng nhập UID GUEST', 'err'); uidInput.focus(); return; }
     if(!pwd){ toast('Vui lòng nhập PASSWORD GUEST', 'err'); pwdInput.focus(); return; }
 
@@ -630,13 +664,15 @@
 
     apiCall('/api/login', payload)
       .then(function(r){
-        if(r.ok && r.data && r.data.success){
+        if(r.httpOk && r.data && r.data.success){
           state.token = r.data.token;
           saveSession();
           toast('Đăng nhập thành công — đã nhận JWT ✓', 'ok');
           showManager();
         }else{
-          var err = (r.data && r.data.error) || 'Không lấy được JWT';
+          var err = r.data && r.data.error
+            ? toSafeString(r.data.error)
+            : ('HTTP ' + r.status);
           toast(err + ' — sẽ dùng UID/Password', 'err');
           state.items = loadItems(state.uid);
           saveSession();
@@ -644,7 +680,7 @@
         }
       })
       .catch(function(e){
-        toast('Không kết nối proxy (' + e.message + ') — kiểm tra server.js', 'err');
+        toast('Không kết nối proxy: ' + toSafeString(e), 'err');
         state.items = loadItems(state.uid);
         showManager();
       })
@@ -657,14 +693,14 @@
   function doLogout(){
     clearSession();
     state.uid = ''; state.password = ''; state.token = ''; state.items = [];
-    state.syncEndpoint = ''; state.loginEndpoint = ''; state.proxy = '';
+    state.syncEndpoint = ''; state.loginEndpoint = '';
     uidInput.value = ''; pwdInput.value = ''; tokenInput.value = '';
-    syncEndpointInput.value = ''; loginEndpointInput.value = ''; proxyInput.value = '';
+    syncEndpointInput.value = ''; loginEndpointInput.value = '';
     showLogin();
     toast('Đã đăng xuất', 'ok');
   }
 
-  /* Sự kiện */
+  /* ==================== SỰ KIỆN ==================== */
   jwtToggle.addEventListener('click', function(){
     jwtToggle.classList.toggle('open'); jwtBody.classList.toggle('open');
   });
@@ -679,7 +715,6 @@
   pwdInput.addEventListener('keydown', function(e){ if(e.key==='Enter') doLogin(); });
   uidInput.addEventListener('keydown', function(e){ if(e.key==='Enter') pwdInput.focus(); });
   tokenInput.addEventListener('keydown', function(e){ if(e.key==='Enter') doLogin(); });
-
   btnLogout.addEventListener('click', doLogout);
 
   btnAdd.addEventListener('click', handleAdd);
@@ -692,10 +727,15 @@
 
   btnRefresh.addEventListener('click', function(){
     syncFromServer(true);
-    toast('Đang tải lại...');
   });
 
-  /* Khởi động */
+  /* Bắt lỗi toàn cục — không bao giờ hiện [object Object] nữa */
+  window.addEventListener('unhandledrejection', function(e){
+    toast('Lỗi: ' + toSafeString(e.reason), 'err');
+    e.preventDefault();
+  });
+
+  /* ==================== KHỞI ĐỘNG ==================== */
   (function init(){
     var s = readSession();
     if(s && (s.token || (s.uid && s.password))){
@@ -704,9 +744,8 @@
       tokenInput.value = s.token || '';
       syncEndpointInput.value = s.syncEndpoint || '';
       loginEndpointInput.value = s.loginEndpoint || '';
-      proxyInput.value = s.proxy || '';
       if(s.token){ jwtToggle.classList.add('open'); jwtBody.classList.add('open'); }
-      if(s.syncEndpoint || s.loginEndpoint || s.proxy){
+      if(s.syncEndpoint || s.loginEndpoint){
         advToggle.classList.add('open'); advBody.classList.add('open');
       }
       state.uid = s.uid || '';
@@ -714,7 +753,6 @@
       state.token = s.token || '';
       state.syncEndpoint = s.syncEndpoint || '';
       state.loginEndpoint = s.loginEndpoint || '';
-      state.proxy = s.proxy || '';
       state.items = loadItems(state.uid || 'anon');
       showManager();
     }else{
@@ -725,4 +763,4 @@
 })();
 </script>
 </body>
-  </html>
+</html>
