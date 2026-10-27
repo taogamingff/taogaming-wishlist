@@ -1,0 +1,379 @@
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Free Fire Wishlist</title>
+<style>
+:root {
+  color-scheme: dark;
+  --bg: #090d18;
+  --panel: #141c2d;
+  --line: #29364e;
+  --blue: #43a5ff;
+  --text: #f4f7ff;
+  --muted: #98a7c0;
+  --red: #ff5368;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: radial-gradient(ellipse at top, #192b4d, var(--bg) 65%);
+  color: var(--text);
+  font-family: system-ui, Arial, sans-serif;
+}
+button, input { font: inherit; }
+button { cursor: pointer; }
+.container { width: min(950px, 94%); margin: auto; padding: 24px 0 50px; }
+header { text-align: center; margin-bottom: 25px; }
+.logo { font-size: 30px; font-weight: 900; color: #67b9ff; }
+.subtitle { color: var(--muted); font-size: 14px; }
+.panel {
+  background: rgba(20,28,45,.96);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 22px;
+  margin-bottom: 18px;
+  box-shadow: 0 12px 35px #0003;
+}
+h2 { margin: 0 0 18px; font-size: 21px; }
+label { display: block; color: #bdc9dc; margin: 13px 0 7px; }
+input {
+  width: 100%;
+  padding: 13px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: #0a1120;
+  color: white;
+  outline: none;
+}
+input:focus { border-color: var(--blue); }
+.btn {
+  border: 0;
+  border-radius: 10px;
+  padding: 12px 16px;
+  color: white;
+  font-weight: 750;
+  background: linear-gradient(100deg, #1688fa, #6856ed);
+}
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.btn-secondary { background: #293750; }
+.btn-danger { background: #a72b43; }
+.full { width: 100%; margin-top: 16px; }
+.hidden { display: none !important; }
+.notice { color: var(--muted); font-size: 13px; line-height: 1.6; }
+.status { margin-top: 13px; font-size: 14px; overflow-wrap: anywhere; }
+.status.error { color: #ff8290; }
+.status.success { color: #71e5ad; }
+.profile {
+  display: flex; justify-content: space-between; align-items: center;
+  flex-wrap: wrap; gap: 12px;
+}
+.uid { color: #71c4ff; font-weight: 800; overflow-wrap: anywhere; }
+.counter { font-size: 14px; color: var(--muted); }
+.counter strong { color: white; font-size: 19px; }
+.add-row { display: flex; gap: 10px; }
+.add-row input { min-width: 0; flex: 1; }
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(145px, 1fr));
+  gap: 13px;
+}
+.item {
+  background: #0b1323;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  padding: 10px;
+  min-width: 0;
+}
+.item img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: contain;
+  border-radius: 9px;
+  background: #182238;
+}
+.item-id { text-align: center; font-weight: 800; margin: 10px 0; }
+.item-actions { display: grid; gap: 7px; }
+.item-actions button { padding: 9px 6px; font-size: 12px; }
+.empty {
+  text-align: center;
+  padding: 30px 10px;
+  color: var(--muted);
+  border: 1px dashed var(--line);
+  border-radius: 12px;
+}
+.footer { text-align: center; color: #71819a; font-size: 12px; margin-top: 25px; }
+@media(max-width:480px) {
+  .container { padding-top: 15px; }
+  .panel { padding: 16px; }
+  .add-row { flex-direction: column; }
+  .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <div class="logo">🔥 FF WISHLIST</div>
+    <div class="subtitle">FREE FIRE ITEM COLLECTION</div>
+  </header>
+
+  <!-- TRANG 1 -->
+  <section id="loginPage" class="panel">
+    <h2>🔐 Nhập UID Game</h2>
+    <label for="uidInput">UID tài khoản</label>
+    <input id="uidInput" inputmode="numeric" maxlength="30"
+           placeholder="Ví dụ: 4260182857" autocomplete="off">
+    <button class="btn full" id="loginBtn">Tiếp tục →</button>
+    <div id="loginStatus" class="status" role="status"></div>
+    <p class="notice">
+      Bản an toàn này chỉ dùng UID để mở trang Wishlist.
+      Nó không xác thực quyền sở hữu tài khoản game.
+      Không nhập mật khẩu game vào trang web không chính thức.
+    </p>
+  </section>
+
+  <!-- TRANG 2 -->
+  <section id="wishlistPage" class="hidden">
+    <div class="panel profile">
+      <div>
+        <div class="subtitle">TÀI KHOẢN ĐANG XEM</div>
+        <div class="uid">UID: <span id="displayUid"></span></div>
+      </div>
+      <button class="btn btn-secondary" id="logoutBtn">Đổi UID</button>
+    </div>
+
+    <div class="panel">
+      <h2>➕ Thêm ID Item</h2>
+      <form id="addForm">
+        <label for="itemInput">ID ITEM</label>
+        <div class="add-row">
+          <input id="itemInput" inputmode="numeric" maxlength="20"
+                 placeholder="Ví dụ: 907104745" required>
+          <button class="btn" type="submit">☆ Gắn Wishlist</button>
+        </div>
+      </form>
+      <div id="itemStatus" class="status" role="status"></div>
+      <p class="notice">
+        Nhập ID dạng số. Mỗi UID có danh sách riêng trên trình duyệt này.
+        Tối đa 100 item; ID phải được kiểm tra trong thư viện để xác nhận tồn tại.
+      </p>
+    </div>
+
+    <div class="panel">
+      <div class="profile" style="margin-bottom:18px">
+        <h2 style="margin:0">⭐ DANH SÁCH MONG MUỐN</h2>
+        <div class="counter"><strong id="count">0</strong>/100</div>
+      </div>
+      <button class="btn btn-danger" id="clearBtn" style="margin-bottom:16px">
+        🗑 Xóa Wishlist tất cả
+      </button>
+      <div id="itemGrid" class="grid"></div>
+      <div id="emptyState" class="empty">
+        Chưa có item nào.<br>Nhập ID bên trên để bắt đầu!
+      </div>
+    </div>
+  </section>
+
+  <div class="footer">Free Fire Wishlist • Dữ liệu lưu trên trình duyệt</div>
+</div>
+
+<script>
+'use strict';
+
+const API_URL = './api.php';
+const LIBRARY_URL =
+  'https://kingofgames02.github.io/Free-Fire-Items-Library/?item=';
+const MAX_ITEMS = 100;
+
+const $ = id => document.getElementById(id);
+
+let currentUid = '';
+let wishlist = [];
+
+function storageKey(uid) {
+  return 'ff_wishlist_v1_' + uid;
+}
+
+function loadWishlist(uid) {
+  try {
+    const value = JSON.parse(localStorage.getItem(storageKey(uid)) || '[]');
+    wishlist = Array.isArray(value)
+      ? [...new Set(value.filter(id =>
+          typeof id === 'string' && /^\d{1,20}$/.test(id)))].slice(0, MAX_ITEMS)
+      : [];
+  } catch {
+    wishlist = [];
+  }
+  renderWishlist();
+}
+
+function saveWishlist() {
+  try {
+    localStorage.setItem(storageKey(currentUid), JSON.stringify(wishlist));
+    renderWishlist();
+    return true;
+  } catch {
+    setStatus('itemStatus',
+      'Không lưu được dữ liệu. Hãy kiểm tra dung lượng trình duyệt.',
+      'error');
+    return false;
+  }
+}
+
+function setStatus(id, message, type = '') {
+  const el = $(id);
+  el.textContent = message;
+  el.className = 'status ' + type;
+}
+
+function enterWishlist() {
+  const uid = $('uidInput').value.trim();
+
+  if (!/^\d{1,30}$/.test(uid)) {
+    setStatus('loginStatus', 'Vui lòng nhập UID chỉ gồm chữ số.', 'error');
+    return;
+  }
+
+  currentUid = uid;
+  $('displayUid').textContent = uid;
+  $('loginPage').classList.add('hidden');
+  $('wishlistPage').classList.remove('hidden');
+  setStatus('loginStatus', '');
+  loadWishlist(uid);
+}
+
+function renderWishlist() {
+  const grid = $('itemGrid');
+  grid.replaceChildren();
+  $('count').textContent = wishlist.length;
+  $('emptyState').classList.toggle('hidden', wishlist.length !== 0);
+
+  wishlist.forEach(id => {
+    const card = document.createElement('article');
+    card.className = 'item';
+
+    const img = document.createElement('img');
+    img.alt = 'Ảnh item ' + id;
+    img.loading = 'lazy';
+
+    // Ảnh CDN trực tiếp; nếu không có ảnh, hiện thông báo.
+    img.src = 'https://cdn.jsdelivr.net/gh/AfnanTawsif/ff-catalog@main/Item-icons/'
+      + encodeURIComponent(id) + '.webp';
+
+    img.onerror = () => {
+      img.onerror = null;
+      img.removeAttribute('src');
+      img.alt = 'Không tìm thấy ảnh CDN cho item ' + id;
+      img.style.background = '#182238';
+    };
+
+    const label = document.createElement('div');
+    label.className = 'item-id';
+    label.textContent = 'ID: ' + id;
+
+    const actions = document.createElement('div');
+    actions.className = 'item-actions';
+
+    const open = document.createElement('button');
+    open.className = 'btn btn-secondary';
+    open.textContent = 'Xem thư viện';
+    open.addEventListener('click', () => {
+      window.open(LIBRARY_URL + encodeURIComponent(id),
+        '_blank', 'noopener,noreferrer');
+    });
+
+    const remove = document.createElement('button');
+    remove.className = 'btn btn-danger';
+    remove.textContent = 'Xóa item';
+    remove.addEventListener('click', () => removeItem(id));
+
+    actions.append(open, remove);
+    card.append(img, label, actions);
+    grid.append(card);
+  });
+}
+
+function removeItem(id) {
+  wishlist = wishlist.filter(item => item !== id);
+  if (saveWishlist()) {
+    setStatus('itemStatus', 'Đã xóa item ' + id + '.', 'success');
+  }
+}
+
+$('loginBtn').addEventListener('click', enterWishlist);
+
+$('uidInput').addEventListener('keydown', event => {
+  if (event.key === 'Enter') enterWishlist();
+});
+
+$('logoutBtn').addEventListener('click', () => {
+  currentUid = '';
+  wishlist = [];
+  $('wishlistPage').classList.add('hidden');
+  $('loginPage').classList.remove('hidden');
+  $('uidInput').value = '';
+  $('itemInput').value = '';
+  setStatus('loginStatus', '');
+  setStatus('itemStatus', '');
+});
+
+$('addForm').addEventListener('submit', event => {
+  event.preventDefault();
+
+  if (!currentUid) return;
+
+  const id = $('itemInput').value.trim();
+
+  if (!/^\d{1,20}$/.test(id)) {
+    setStatus('itemStatus', 'ID item phải gồm 1–20 chữ số.', 'error');
+    return;
+  }
+
+  if (wishlist.includes(id)) {
+    setStatus('itemStatus', 'Item này đã có trong Wishlist.', 'error');
+    return;
+  }
+
+  if (wishlist.length >= MAX_ITEMS) {
+    setStatus('itemStatus', 'Wishlist đã đạt giới hạn 100 item.', 'error');
+    return;
+  }
+
+  wishlist.push(id);
+
+  if (saveWishlist()) {
+    $('itemInput').value = '';
+    setStatus('itemStatus', 'Đã thêm item ' + id + ' vào Wishlist.', 'success');
+  } else {
+    wishlist = wishlist.filter(item => item !== id);
+    renderWishlist();
+  }
+});
+
+$('clearBtn').addEventListener('click', () => {
+  if (!currentUid || wishlist.length === 0) {
+    setStatus('itemStatus', 'Wishlist hiện đang trống.');
+    return;
+  }
+
+  if (!confirm('Bạn có chắc muốn xóa toàn bộ Wishlist của UID này?')) {
+    return;
+  }
+
+  const previous = [...wishlist];
+  wishlist = [];
+
+  if (saveWishlist()) {
+    setStatus('itemStatus', 'Đã xóa toàn bộ Wishlist.', 'success');
+  } else {
+    wishlist = previous;
+    renderWishlist();
+  }
+});
+</script>
+</body>
+</html>
