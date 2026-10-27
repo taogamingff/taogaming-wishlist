@@ -1,7 +1,4 @@
-const {
-  callUpstream, extractToken, toSafeString,
-  setCors, getBody
-} = require('./_utils');
+const utils = require('./_utils.js');
 
 const LOGIN_CANDIDATES = [
   '/login', '/api/login', '/auth', '/api/auth',
@@ -9,17 +6,17 @@ const LOGIN_CANDIDATES = [
   '/user/login', '/api/user/login'
 ];
 
-module.exports = async (req, res) => {
-  setCors(res);
+module.exports = async function handler(req, res) {
+  utils.setCors(res);
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') {
     return res.status(405).json({ success: false, error: 'Dùng POST' });
   }
 
-  const body = getBody(req);
-  const uid = (body.uid || '').toString().trim();
-  const password = (body.password || '').toString().trim();
-  const customEndpoint = (body.customEndpoint || '').toString().trim();
+  const body = utils.getBody(req);
+  const uid = String(body.uid || '').trim();
+  const password = String(body.password || '').trim();
+  const customEndpoint = String(body.customEndpoint || '').trim();
 
   if (!uid || !password) {
     return res.status(400).json({ success: false, error: 'Thiếu uid hoặc password' });
@@ -27,36 +24,38 @@ module.exports = async (req, res) => {
 
   const attempts = [];
   if (customEndpoint) attempts.push(customEndpoint);
-  attempts.push(...LOGIN_CANDIDATES);
+  for (let i = 0; i < LOGIN_CANDIDATES.length; i++) attempts.push(LOGIN_CANDIDATES[i]);
 
   const results = [];
 
-  for (const pathname of attempts) {
-    // GET
-    let r = await callUpstream(pathname, { uid, password }, 'GET');
+  for (let i = 0; i < attempts.length; i++) {
+    const pathname = attempts[i];
+
+    // Thử GET
+    let r = await utils.callUpstream(pathname, { uid: uid, password: password }, 'GET');
     results.push({ path: pathname, method: 'GET', status: r.status, ok: r.ok });
     if (r.ok) {
-      const token = extractToken(r.data);
+      const token = utils.extractToken(r.data);
       if (token) {
         return res.json({
           success: true,
-          token,
-          via: `GET ${pathname}`,
+          token: token,
+          via: 'GET ' + pathname,
           attempts: results
         });
       }
     }
 
-    // POST
-    r = await callUpstream(pathname, {}, 'POST', { uid, password });
+    // Thử POST
+    r = await utils.callUpstream(pathname, {}, 'POST', { uid: uid, password: password });
     results.push({ path: pathname, method: 'POST', status: r.status, ok: r.ok });
     if (r.ok) {
-      const token = extractToken(r.data);
+      const token = utils.extractToken(r.data);
       if (token) {
         return res.json({
           success: true,
-          token,
-          via: `POST ${pathname}`,
+          token: token,
+          via: 'POST ' + pathname,
           attempts: results
         });
       }
