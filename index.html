@@ -6,299 +6,374 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Free Fire Wishlist</title>
 <style>
-*{box-sizing:border-box}
-body{margin:0;background:#0a1020;color:#f5f7ff;font:16px system-ui,Arial}
-main{width:min(950px,94%);margin:auto;padding:25px 0}
-header{text-align:center;margin-bottom:25px}
-.logo{font-size:30px;font-weight:900;color:#62baff}
-.panel{background:#151e30;border:1px solid #2b3952;border-radius:16px;padding:20px;margin-bottom:16px}
-h2{margin:0 0 16px;font-size:21px}
-label{display:block;margin:12px 0 7px;color:#c3cee0}
-input{width:100%;padding:13px;border-radius:10px;border:1px solid #34435d;background:#0a1221;color:white;font:inherit}
-button{border:0;border-radius:10px;padding:12px 15px;color:white;background:linear-gradient(100deg,#1688fa,#6856ed);font:inherit;font-weight:700;cursor:pointer}
-button:disabled{opacity:.5}
-.secondary{background:#30405b}.danger{background:#b52f48}
-.full{width:100%;margin-top:14px}
-.hidden{display:none!important}
-.row{display:flex;gap:10px;justify-content:space-between;align-items:center;flex-wrap:wrap}
-.formrow{display:flex;gap:10px}.formrow input{flex:1;min-width:0}
-.muted,.hint{color:#9eacc2}.hint{font-size:13px;line-height:1.6}
-.status{font-size:14px;margin-top:12px;overflow-wrap:anywhere}
-.error{color:#ff8796}.success{color:#76e3ad}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:12px}
-.item{background:#0b1424;border:1px solid #2b3952;border-radius:12px;padding:10px;min-width:0}
-.item img{width:100%;aspect-ratio:1;object-fit:contain;background:#1a263c;border-radius:8px}
-.item .id{text-align:center;font-weight:800;margin:10px 0}
-.actions{display:grid;gap:7px}.actions button{font-size:12px;padding:9px 5px}
-.empty{text-align:center;padding:28px;border:1px dashed #34435d;border-radius:12px;color:#9eacc2}
-footer{text-align:center;color:#71819a;font-size:12px;padding:20px}
-@media(max-width:480px){.panel{padding:15px}.formrow{flex-direction:column}.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+:root {
+  color-scheme: dark;
+  --bg: #090d18;
+  --panel: #141c2d;
+  --line: #29364e;
+  --blue: #43a5ff;
+  --text: #f4f7ff;
+  --muted: #98a7c0;
+  --red: #ff5368;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: radial-gradient(ellipse at top, #192b4d, var(--bg) 65%);
+  color: var(--text);
+  font-family: system-ui, Arial, sans-serif;
+}
+button, input { font: inherit; }
+button { cursor: pointer; }
+.container { width: min(950px, 94%); margin: auto; padding: 24px 0 50px; }
+header { text-align: center; margin-bottom: 25px; }
+.logo { font-size: 30px; font-weight: 900; color: #67b9ff; }
+.subtitle { color: var(--muted); font-size: 14px; }
+.panel {
+  background: rgba(20,28,45,.96);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 22px;
+  margin-bottom: 18px;
+  box-shadow: 0 12px 35px #0003;
+}
+h2 { margin: 0 0 18px; font-size: 21px; }
+label { display: block; color: #bdc9dc; margin: 13px 0 7px; }
+input {
+  width: 100%;
+  padding: 13px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: #0a1120;
+  color: white;
+  outline: none;
+}
+input:focus { border-color: var(--blue); }
+.btn {
+  border: 0;
+  border-radius: 10px;
+  padding: 12px 16px;
+  color: white;
+  font-weight: 750;
+  background: linear-gradient(100deg, #1688fa, #6856ed);
+}
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.btn-secondary { background: #293750; }
+.btn-danger { background: #a72b43; }
+.full { width: 100%; margin-top: 16px; }
+.hidden { display: none !important; }
+.notice { color: var(--muted); font-size: 13px; line-height: 1.6; }
+.status { margin-top: 13px; font-size: 14px; overflow-wrap: anywhere; }
+.status.error { color: #ff8290; }
+.status.success { color: #71e5ad; }
+.profile {
+  display: flex; justify-content: space-between; align-items: center;
+  flex-wrap: wrap; gap: 12px;
+}
+.uid { color: #71c4ff; font-weight: 800; overflow-wrap: anywhere; }
+.counter { font-size: 14px; color: var(--muted); }
+.counter strong { color: white; font-size: 19px; }
+.add-row { display: flex; gap: 10px; }
+.add-row input { min-width: 0; flex: 1; }
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(145px, 1fr));
+  gap: 13px;
+}
+.item {
+  background: #0b1323;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  padding: 10px;
+  min-width: 0;
+}
+.item img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: contain;
+  border-radius: 9px;
+  background: #182238;
+}
+.item-id { text-align: center; font-weight: 800; margin: 10px 0; }
+.item-actions { display: grid; gap: 7px; }
+.item-actions button { padding: 9px 6px; font-size: 12px; }
+.empty {
+  text-align: center;
+  padding: 30px 10px;
+  color: var(--muted);
+  border: 1px dashed var(--line);
+  border-radius: 12px;
+}
+.footer { text-align: center; color: #71819a; font-size: 12px; margin-top: 25px; }
+@media(max-width:480px) {
+  .container { padding-top: 15px; }
+  .panel { padding: 16px; }
+  .add-row { flex-direction: column; }
+  .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
 </style>
 </head>
 <body>
-<main>
-<header><div class="logo">🔥 FF WISHLIST</div><div class="muted">Wishlist đồng bộ nhiều thiết bị</div></header>
+<div class="container">
+  <header>
+    <div class="logo">🔥 FF WISHLIST</div>
+    <div class="subtitle">FREE FIRE ITEM COLLECTION</div>
+  </header>
 
-<section id="authPage" class="panel">
-  <h2 id="authTitle">🔐 Đăng nhập Wishlist</h2>
-  <p class="hint">Đây là mật khẩu riêng của ứng dụng Wishlist, không phải mật khẩu Free Fire.</p>
-  <form id="authForm">
-    <label for="uid">UID</label>
-    <input id="uid" inputmode="numeric" pattern="[0-9]{1,30}" maxlength="30" required autocomplete="username" placeholder="Ví dụ: 4260182857">
-    <label for="password">Mật khẩu Wishlist</label>
-    <input id="password" type="password" minlength="10" maxlength="72" required autocomplete="current-password" placeholder="Ít nhất 10 ký tự">
-    <button class="full" id="authSubmit">Đăng nhập</button>
-  </form>
-  <button class="full secondary" id="toggleAuth" type="button">Tạo tài khoản Wishlist mới</button>
-  <div id="authStatus" class="status" role="status"></div>
-</section>
+  <!-- TRANG 1 -->
+  <section id="loginPage" class="panel">
+    <h2>🔐 Nhập UID Game</h2>
+    <label for="uidInput">UID tài khoản</label>
+    <input id="uidInput" inputmode="numeric" maxlength="30"
+           placeholder="Ví dụ: 4260182857" autocomplete="off">
+    <button class="btn full" id="loginBtn">Tiếp tục →</button>
+    <div id="loginStatus" class="status" role="status"></div>
+    <p class="notice">
+      Bản an toàn này chỉ dùng UID để mở trang Wishlist.
+      Nó không xác thực quyền sở hữu tài khoản game.
+      Không nhập mật khẩu game vào trang web không chính thức.
+    </p>
+  </section>
 
-<section id="appPage" class="hidden">
-  <div class="panel row">
-    <div><div class="muted">TÀI KHOẢN</div><b>UID: <span id="uidLabel"></span></b></div>
-    <button class="secondary" id="logout">Đăng xuất</button>
-  </div>
-
-  <section class="panel">
-    <h2>➕ Gắn Wishlist</h2>
-    <form id="addForm">
-      <label for="itemId">ID ITEM</label>
-      <div class="formrow">
-        <input id="itemId" inputmode="numeric" maxlength="20" pattern="[0-9]{1,20}" required placeholder="Ví dụ: 907104745">
-        <button id="addBtn">Gắn Wishlist</button>
+  <!-- TRANG 2 -->
+  <section id="wishlistPage" class="hidden">
+    <div class="panel profile">
+      <div>
+        <div class="subtitle">TÀI KHOẢN ĐANG XEM</div>
+        <div class="uid">UID: <span id="displayUid"></span></div>
       </div>
-    </form>
-    <div id="itemStatus" class="status" role="status"></div>
-    <p class="hint">Tối đa 100 item. Nếu ảnh không tải được, bạn vẫn có thể mở trang thư viện chính thức của item.</p>
+      <button class="btn btn-secondary" id="logoutBtn">Đổi UID</button>
+    </div>
+
+    <div class="panel">
+      <h2>➕ Thêm ID Item</h2>
+      <form id="addForm">
+        <label for="itemInput">ID ITEM</label>
+        <div class="add-row">
+          <input id="itemInput" inputmode="numeric" maxlength="20"
+                 placeholder="Ví dụ: 907104745" required>
+          <button class="btn" type="submit">☆ Gắn Wishlist</button>
+        </div>
+      </form>
+      <div id="itemStatus" class="status" role="status"></div>
+      <p class="notice">
+        Nhập ID dạng số. Mỗi UID có danh sách riêng trên trình duyệt này.
+        Tối đa 100 item; ID phải được kiểm tra trong thư viện để xác nhận tồn tại.
+      </p>
+    </div>
+
+    <div class="panel">
+      <div class="profile" style="margin-bottom:18px">
+        <h2 style="margin:0">⭐ DANH SÁCH MONG MUỐN</h2>
+        <div class="counter"><strong id="count">0</strong>/100</div>
+      </div>
+      <button class="btn btn-danger" id="clearBtn" style="margin-bottom:16px">
+        🗑 Xóa Wishlist tất cả
+      </button>
+      <div id="itemGrid" class="grid"></div>
+      <div id="emptyState" class="empty">
+        Chưa có item nào.<br>Nhập ID bên trên để bắt đầu!
+      </div>
+    </div>
   </section>
 
-  <section class="panel">
-    <div class="row" style="margin-bottom:16px">
-      <h2 style="margin:0">⭐ DANH SÁCH MONG MUỐN</h2>
-      <b><span id="count">0</span>/100</b>
-    </div>
-    <button class="danger" id="clearAll" style="margin-bottom:15px">Xóa Wishlist tất cả</button>
-    <div id="grid" class="grid"></div>
-    <div id="empty" class="empty">Chưa có item nào.</div>
-  </section>
-</section>
-<footer>Wishlist dùng backend riêng. Không nhập mật khẩu game.</footer>
-</main>
+  <div class="footer">Free Fire Wishlist • Dữ liệu lưu trên trình duyệt</div>
+</div>
 
 <script>
 'use strict';
-const API_BASE = 'https://ff-wishlist-api.onrender.com';
-const LIBRARY_BASE = 'https://kingofgames02.github.io/Free-Fire-Items-Library/';
+
+const API_URL = './api.php';
+const LIBRARY_URL =
+  'https://kingofgames02.github.io/Free-Fire-Items-Library/?item=';
+const MAX_ITEMS = 100;
+
 const $ = id => document.getElementById(id);
-let token = sessionStorage.getItem('ffwl_token') || '';
-let uid = sessionStorage.getItem('ffwl_uid') || '';
-let registerMode = false;
-let items = [];
 
-function setStatus(id, message, type='') {
-  $(id).textContent = message;
-  $(id).className = 'status ' + type;
+let currentUid = '';
+let wishlist = [];
+
+function storageKey(uid) {
+  return 'ff_wishlist_v1_' + uid;
 }
-async function api(path, options={}) {
-  if (API_BASE.includes('YOUR-RENDER-SERVICE')) {
-    throw new Error('Hãy sửa API_BASE thành URL Render thật.');
+
+function loadWishlist(uid) {
+  try {
+    const value = JSON.parse(localStorage.getItem(storageKey(uid)) || '[]');
+    wishlist = Array.isArray(value)
+      ? [...new Set(value.filter(id =>
+          typeof id === 'string' && /^\d{1,20}$/.test(id)))].slice(0, MAX_ITEMS)
+      : [];
+  } catch {
+    wishlist = [];
   }
-  const headers = {'Content-Type':'application/json', ...(options.headers||{})};
-  if (token) headers.Authorization = 'Bearer ' + token;
-  const response = await fetch(API_BASE + path, {...options, headers});
-  const data = await response.json().catch(()=>({error:'Phản hồi máy chủ không hợp lệ.'}));
-  if (!response.ok) throw new Error(data.error || 'Yêu cầu thất bại.');
-  return data;
+  renderWishlist();
 }
-function showApp() {
-  $('authPage').classList.add('hidden');
-  $('appPage').classList.remove('hidden');
-  $('uidLabel').textContent = uid;
-}
-function showAuth() {
-  $('appPage').classList.add('hidden');
-  $('authPage').classList.remove('hidden');
-}
-async function loadItems() {
-  const data = await api('/api/wishlist');
-  items = data.items.map(x=>x.itemId);
-  render();
-}
-function render() {
-  $('count').textContent = items.length;
-  $('empty').classList.toggle('hidden', items.length > 0);
-  const grid = $('grid');
-  grid.replaceChildren();
 
-  for (const id of items) {
+function saveWishlist() {
+  try {
+    localStorage.setItem(storageKey(currentUid), JSON.stringify(wishlist));
+    renderWishlist();
+    return true;
+  } catch {
+    setStatus('itemStatus',
+      'Không lưu được dữ liệu. Hãy kiểm tra dung lượng trình duyệt.',
+      'error');
+    return false;
+  }
+}
+
+function setStatus(id, message, type = '') {
+  const el = $(id);
+  el.textContent = message;
+  el.className = 'status ' + type;
+}
+
+function enterWishlist() {
+  const uid = $('uidInput').value.trim();
+
+  if (!/^\d{1,30}$/.test(uid)) {
+    setStatus('loginStatus', 'Vui lòng nhập UID chỉ gồm chữ số.', 'error');
+    return;
+  }
+
+  currentUid = uid;
+  $('displayUid').textContent = uid;
+  $('loginPage').classList.add('hidden');
+  $('wishlistPage').classList.remove('hidden');
+  setStatus('loginStatus', '');
+  loadWishlist(uid);
+}
+
+function renderWishlist() {
+  const grid = $('itemGrid');
+  grid.replaceChildren();
+  $('count').textContent = wishlist.length;
+  $('emptyState').classList.toggle('hidden', wishlist.length !== 0);
+
+  wishlist.forEach(id => {
     const card = document.createElement('article');
     card.className = 'item';
+
     const img = document.createElement('img');
     img.alt = 'Ảnh item ' + id;
     img.loading = 'lazy';
-    // URL CDN mẫu; thay bằng URL ảnh đã xác minh nếu thư viện có định dạng khác.
-    img.src = 'https://cdn.jsdelivr.net/gh/AfnanTawsif/ff-catalog@main/Item-icons/' + encodeURIComponent(id) + '.webp';
-    img.onerror = () => { img.onerror=null; img.style.display='none'; };
+
+    // Ảnh CDN trực tiếp; nếu không có ảnh, hiện thông báo.
+    img.src = 'https://cdn.jsdelivr.net/gh/AfnanTawsif/ff-catalog@main/Item-icons/'
+      + encodeURIComponent(id) + '.webp';
+
+    img.onerror = () => {
+      img.onerror = null;
+      img.removeAttribute('src');
+      img.alt = 'Không tìm thấy ảnh CDN cho item ' + id;
+      img.style.background = '#182238';
+    };
 
     const label = document.createElement('div');
-    label.className = 'id';
+    label.className = 'item-id';
     label.textContent = 'ID: ' + id;
 
     const actions = document.createElement('div');
-    actions.className = 'actions';
+    actions.className = 'item-actions';
+
     const open = document.createElement('button');
-    open.className = 'secondary';
-    open.textContent = 'Mở thư viện';
-    open.addEventListener('click',()=>{
-      const url = new URL(LIBRARY_BASE);
-      url.searchParams.set('item', id);
-      window.open(url.toString(), '_blank', 'noopener,noreferrer');
+    open.className = 'btn btn-secondary';
+    open.textContent = 'Xem thư viện';
+    open.addEventListener('click', () => {
+      window.open(LIBRARY_URL + encodeURIComponent(id),
+        '_blank', 'noopener,noreferrer');
     });
 
-    const del = document.createElement('button');
-    del.className = 'danger';
-    del.textContent = 'Xóa item';
-    del.addEventListener('click', async()=>{
-      del.disabled = true;
-      try {
-        await api('/api/wishlist/' + encodeURIComponent(id), {method:'DELETE'});
-        items = items.filter(x=>x!==id);
-        render();
-        setStatus('itemStatus','Đã xóa item ' + id + '.','success');
-      } catch(e) {
-        setStatus('itemStatus',e.message,'error');
-        del.disabled = false;
-      }
-    });
-    actions.append(open,del);
-    card.append(img,label,actions);
+    const remove = document.createElement('button');
+    remove.className = 'btn btn-danger';
+    remove.textContent = 'Xóa item';
+    remove.addEventListener('click', () => removeItem(id));
+
+    actions.append(open, remove);
+    card.append(img, label, actions);
     grid.append(card);
+  });
+}
+
+function removeItem(id) {
+  wishlist = wishlist.filter(item => item !== id);
+  if (saveWishlist()) {
+    setStatus('itemStatus', 'Đã xóa item ' + id + '.', 'success');
   }
 }
 
-$('toggleAuth').addEventListener('click',()=>{
-  registerMode = !registerMode;
-  $('authTitle').textContent = registerMode ? '🆕 Tạo tài khoản Wishlist' : '🔐 Đăng nhập Wishlist';
-  $('authSubmit').textContent = registerMode ? 'Tạo tài khoản' : 'Đăng nhập';
-  $('toggleAuth').textContent = registerMode ? 'Đã có tài khoản? Đăng nhập' : 'Tạo tài khoản Wishlist mới';
-  $('password').autocomplete = registerMode ? 'new-password' : 'current-password';
-  setStatus('authStatus','');
+$('loginBtn').addEventListener('click', enterWishlist);
+
+$('uidInput').addEventListener('keydown', event => {
+  if (event.key === 'Enter') enterWishlist();
 });
 
-$('authForm').addEventListener('submit', async e=>{
-  e.preventDefault();
-  const btn = $('authSubmit');
-  btn.disabled = true;
-  setStatus('authStatus','Đang kết nối máy chủ…');
-  try {
-    const data = await api('/api/auth/' + (registerMode?'register':'login'), {
-      method:'POST',
-      body:JSON.stringify({uid:$('uid').value.trim(),password:$('password').value})
-    });
-    token=data.token; uid=data.uid;
-    sessionStorage.setItem('ffwl_token',token);
-    sessionStorage.setItem('ffwl_uid',uid);
-    $('password').value='';
-    showApp();
-    await loadItems();
-    setStatus('itemStatus','Đã kết nối máy chủ.','success');
-  } catch(err) {
-    setStatus('authStatus',err.message,'error');
-  } finally {
-    btn.disabled=false;
+$('logoutBtn').addEventListener('click', () => {
+  currentUid = '';
+  wishlist = [];
+  $('wishlistPage').classList.add('hidden');
+  $('loginPage').classList.remove('hidden');
+  $('uidInput').value = '';
+  $('itemInput').value = '';
+  setStatus('loginStatus', '');
+  setStatus('itemStatus', '');
+});
+
+$('addForm').addEventListener('submit', event => {
+  event.preventDefault();
+
+  if (!currentUid) return;
+
+  const id = $('itemInput').value.trim();
+
+  if (!/^\d{1,20}$/.test(id)) {
+    setStatus('itemStatus', 'ID item phải gồm 1–20 chữ số.', 'error');
+    return;
+  }
+
+  if (wishlist.includes(id)) {
+    setStatus('itemStatus', 'Item này đã có trong Wishlist.', 'error');
+    return;
+  }
+
+  if (wishlist.length >= MAX_ITEMS) {
+    setStatus('itemStatus', 'Wishlist đã đạt giới hạn 100 item.', 'error');
+    return;
+  }
+
+  wishlist.push(id);
+
+  if (saveWishlist()) {
+    $('itemInput').value = '';
+    setStatus('itemStatus', 'Đã thêm item ' + id + ' vào Wishlist.', 'success');
+  } else {
+    wishlist = wishlist.filter(item => item !== id);
+    renderWishlist();
   }
 });
 
-$('addForm').addEventListener('submit',async e=>{
-  e.preventDefault();
-  const id=$('itemId').value.trim();
-  $('addBtn').disabled=true;
-  try {
-    await api('/api/wishlist',{method:'POST',body:JSON.stringify({itemId:id})});
-    items.unshift(id); render(); $('itemId').value='';
-    setStatus('itemStatus','Đã thêm item '+id+'.','success');
-  } catch(err) { setStatus('itemStatus',err.message,'error'); }
-  finally { $('addBtn').disabled=false; }
-});
-
-$('clearAll').addEventListener('click',async()=>{
-  if(!items.length){setStatus('itemStatus','Wishlist đang trống.');return;}
-  if(!confirm('Xóa toàn bộ Wishlist của tài khoản này?')) return;
-  $('clearAll').disabled=true;
-  try {
-    await api('/api/wishlist',{method:'DELETE'});
-    items=[];render();setStatus('itemStatus','Đã xóa toàn bộ Wishlist.','success');
-  } catch(e) {setStatus('itemStatus',e.message,'error');}
-  finally {$('clearAll').disabled=false;}
-});
-
-$('logout').addEventListener('click',()=>{
-  token='';uid='';items=[];
-  sessionStorage.removeItem('ffwl_token');
-  sessionStorage.removeItem('ffwl_uid');
-  $('password').value='';
-  showAuth();
-  setStatus('authStatus','Bạn đã đăng xuất.');
-});
-
-(async()=>{
-  if(!token||!uid)return;
-  try { await api('/api/me'); showApp(); await loadItems(); }
-  catch {
-    token='';uid='';
-    sessionStorage.removeItem('ffwl_token');
-    sessionStorage.removeItem('ffwl_uid');
-    showAuth();
+$('clearBtn').addEventListener('click', () => {
+  if (!currentUid || wishlist.length === 0) {
+    setStatus('itemStatus', 'Wishlist hiện đang trống.');
+    return;
   }
-})();
+
+  if (!confirm('Bạn có chắc muốn xóa toàn bộ Wishlist của UID này?')) {
+    return;
+  }
+
+  const previous = [...wishlist];
+  wishlist = [];
+
+  if (saveWishlist()) {
+    setStatus('itemStatus', 'Đã xóa toàn bộ Wishlist.', 'success');
+  } else {
+    wishlist = previous;
+    renderWishlist();
+  }
+});
 </script>
 </body>
 </html>
-''',
-"README.md": r'''# Free Fire Wishlist — GitHub Pages + Render + PostgreSQL
-
-## Cấu trúc
-- `public/index.html`: giao diện tĩnh cho GitHub Pages.
-- `server.js`: API Node.js/Express trên Render.
-- PostgreSQL: tài khoản ứng dụng và Wishlist dùng chung giữa thiết bị.
-- `package.json`: dependencies và lệnh khởi chạy.
-
-## Triển khai Render
-1. Tạo PostgreSQL database trên Render.
-2. Tạo Web Service từ repository GitHub.
-3. Build command: `npm install`
-4. Start command: `npm start`
-5. Environment variables:
-   - `DATABASE_URL`: connection string PostgreSQL.
-   - `PGSSL`: `true` nếu nhà cung cấp yêu cầu SSL.
-   - `JWT_SECRET`: chuỗi ngẫu nhiên dài tối thiểu 32 ký tự.
-   - `FRONTEND_ORIGIN`: origin chính xác của GitHub Pages, ví dụ `https://TEN-GITHUB.github.io`.
-   - `ITEM_LIBRARY_BASE`: `https://kingofgames02.github.io/Free-Fire-Items-Library/`
-6. Deploy và kiểm tra `/api/health`.
-
-## Triển khai GitHub Pages
-1. Sửa `API_BASE` trong `public/index.html` thành URL Render thực.
-2. Repository → Settings → Pages → Deploy from a branch → `main` → `/public`.
-3. Kiểm tra `FRONTEND_ORIGIN` trên Render khớp origin Pages.
-
-## Quan trọng
-- Mật khẩu đăng nhập trong app này là mật khẩu Wishlist riêng, KHÔNG phải mật khẩu Free Fire.
-- Không gọi API guest-to-JWT bên thứ ba trong mã này.
-- URL `?item=ID` là trang thư viện, không phải ảnh trực tiếp. CDN mẫu trong giao diện chưa được xác minh; nếu không có ảnh, nút mở thư viện vẫn hoạt động.
-- UID không chứng minh quyền sở hữu tài khoản. Bất kỳ ai biết UID chưa đăng ký có thể đăng ký nó đầu tiên; với triển khai công khai cần thêm cơ chế xác minh/khôi phục tài khoản.
-- Không commit `.env`, JWT secret, hay database URL.
-'''
-}
-for rel, content in files.items():
-    path=os.path.join(base,rel)
-    os.makedirs(os.path.dirname(path),exist_ok=True)
-    with open(path,"w",encoding="utf-8") as f: f.write(content)
-zip_path="/mnt/data/FF-Wishlist-Source-Code.zip"
-with zipfile.ZipFile(zip_path,"w",zipfile.ZIP_DEFLATED) as z:
-    for root,dirs,names in os.walk(base):
-        for name in names:
-            p=os.path.join(root,name)
-            z.write(p,os.path.relpath(p,base))
-print(zip_path, os.path.getsize(zip_path), list(files.keys()))
-print("Server lines", sum(1 for _ in open(base+"/server.js")))
-print("HTML lines", sum(1 for _ in open(base+"/public/index.html")))
