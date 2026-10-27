@@ -1,169 +1,728 @@
-
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Wishlist Portal</title>
-  <style>
-    * { box-sizing: border-box; }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>QUẢN LÝ WISHLIST</title>
+<style>
+  :root{
+    --bg:#080b14; --line:#2a3352; --text:#e8ecf8; --muted:#8b96b8;
+    --brand:#7c5cff; --brand-2:#22d3ee; --danger:#ff4d6d; --ok:#2ee6a8;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{
+    margin:0; font-family:'Segoe UI',system-ui,sans-serif; color:var(--text);
+    min-height:100vh;
+    background: radial-gradient(1200px 700px at 10% -10%, #1b2450 0%, transparent 60%),
+                radial-gradient(900px 600px at 110% 10%, #2a1650 0%, transparent 55%), var(--bg);
+    background-attachment:fixed;
+  }
+  .page{display:none;min-height:100vh;padding:24px 16px 70px}
+  .page.active{display:block;animation:fade .35s ease}
+  #page-login.active{display:flex;align-items:center;justify-content:center}
+  @keyframes fade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 
-    body {
-      margin: 0;
-      min-height: 100vh;
-      display: grid;
-      place-items: center;
-      padding: 20px;
-      font-family: Arial, sans-serif;
-      color: #f5f5f5;
-      background: #10131c;
-    }
+  .auth{
+    width:100%;max-width:460px;
+    background:linear-gradient(180deg,rgba(28,36,64,.92),rgba(14,19,34,.96));
+    border:1px solid var(--line);border-radius:22px;padding:28px 22px 22px;
+    box-shadow:0 24px 60px rgba(0,0,0,.6);backdrop-filter:blur(12px);
+  }
+  .brand-badge{
+    width:66px;height:66px;border-radius:20px;margin:0 auto 16px;
+    display:grid;place-items:center;font-size:30px;
+    background:linear-gradient(135deg,#7c5cff,#22d3ee);
+    box-shadow:0 12px 30px rgba(124,92,255,.45);
+  }
+  .title{
+    font-size:21px;text-align:center;margin:0 0 6px;font-weight:800;
+    background:linear-gradient(90deg,#fff,#a8b6ff);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .sub{text-align:center;font-size:11.5px;letter-spacing:1.4px;color:var(--muted);
+       margin:0 0 22px;text-transform:uppercase;font-weight:600}
+  .field{margin-bottom:13px}
+  .field label,.tool-label{
+    display:block;font-size:10.5px;letter-spacing:1.3px;color:var(--muted);
+    margin-bottom:7px;font-weight:800;text-transform:uppercase;
+  }
+  .field label .optional{color:#5a6488;font-weight:600;text-transform:none;font-size:10px}
+  .row{display:flex;gap:8px}
+  input[type=text],input[type=password]{
+    flex:1;min-width:0;width:100%;background:#0d1324;border:1px solid var(--line);
+    border-radius:12px;padding:13px 14px;color:var(--text);font-size:14px;outline:none;
+    font-family:inherit;transition:border-color .2s,box-shadow .2s;
+  }
+  input:focus{border-color:var(--brand);box-shadow:0 0 0 3px rgba(124,92,255,.18)}
+  input::placeholder{color:#5a6488}
 
-    .card {
-      width: 100%;
-      max-width: 440px;
-      padding: 28px;
-      border: 1px solid #34394b;
-      border-radius: 18px;
-      background: #1a1f2d;
-    }
+  .btn{
+    border:0;border-radius:12px;padding:13px 18px;font-size:13.5px;font-weight:800;
+    letter-spacing:.6px;cursor:pointer;transition:transform .15s,filter .15s;
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    font-family:inherit;color:#fff;
+  }
+  .btn:active{transform:scale(.96)} .btn:disabled{opacity:.55;cursor:not-allowed}
+  .btn.primary{background:linear-gradient(135deg,#7c5cff,#5b8cff);box-shadow:0 10px 24px rgba(92,110,255,.35)}
+  .btn.ghost{background:#1a2138;color:#c3cced;border:1px solid var(--line)}
+  .btn.ghost:hover{background:#222b47}
+  .btn.ok{background:linear-gradient(135deg,#10b981,#22d3ee);color:#04121a}
+  .btn.danger{background:linear-gradient(135deg,#ff4d6d,#ff8a5b)}
+  .btn.block{width:100%;padding:15px;margin-top:10px;font-size:14px}
+  .btn.mini{padding:8px 12px;font-size:14px;border-radius:10px}
+  .hint{text-align:center;font-size:11.5px;color:#6b779c;margin:14px 0 0}
+  .hint b{color:var(--brand-2)}
 
-    h1 { margin-top: 0; font-size: 25px; }
-    p { color: #c3c9d8; line-height: 1.6; }
+  .toggle-box{
+    display:flex;align-items:center;justify-content:space-between;
+    cursor:pointer;user-select:none;margin:6px 0;
+    padding:11px 14px;border-radius:10px;background:#0d1324;
+    border:1px solid var(--line);font-size:11.5px;color:#a8b6ff;
+    font-weight:700;letter-spacing:.4px;
+  }
+  .toggle-box .arrow{transition:transform .2s}
+  .toggle-box.open .arrow{transform:rotate(180deg)}
+  .toggle-body{display:none;padding-top:4px}
+  .toggle-body.open{display:block}
 
-    input, button {
-      width: 100%;
-      padding: 13px;
-      margin-top: 12px;
-      border-radius: 9px;
-      font-size: 15px;
-    }
+  .shell{max-width:1100px;margin:0 auto}
+  .topbar{display:flex;justify-content:space-between;align-items:flex-start;
+          gap:14px;margin-bottom:22px;flex-wrap:wrap}
+  .head-title{
+    font-size:20px;font-weight:800;margin:0 0 5px;
+    background:linear-gradient(90deg,#fff,#a8b6ff);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .head-sub{font-size:11px;letter-spacing:1.3px;color:var(--muted);
+            margin:0;text-transform:uppercase;font-weight:600}
 
-    input {
-      color: white;
-      background: #10131c;
-      border: 1px solid #444b60;
-    }
+  .status-bar{
+    display:flex;gap:10px;align-items:center;flex-wrap:wrap;
+    background:#0d1324;border:1px solid var(--line);border-radius:12px;
+    padding:10px 14px;margin-bottom:16px;font-size:12px;color:var(--muted);
+  }
+  .status-bar .dot{width:9px;height:9px;border-radius:50%;background:#6b779c;flex-shrink:0}
+  .status-bar .dot.on{background:var(--ok);box-shadow:0 0 8px var(--ok)}
+  .status-bar .dot.off{background:var(--danger)}
+  .status-bar b{color:#cfd8f5}
 
-    button {
-      border: 0;
-      color: white;
-      background: #635bff;
-      cursor: pointer;
-      font-weight: bold;
-    }
+  .tools{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px}
+  @media(max-width:760px){.tools{grid-template-columns:1fr}}
+  .tool{background:linear-gradient(180deg,rgba(28,36,64,.78),rgba(15,20,35,.78));
+        border:1px solid var(--line);border-radius:16px;padding:15px}
+  .preview{font-size:11.5px;color:var(--brand-2);margin-top:9px;min-height:15px;
+           word-break:break-all;font-weight:600}
 
-    button:hover { background: #5148e5; }
-    .hidden { display: none; }
-    .status { overflow-wrap: anywhere; }
-    a { color: #a9b2ff; }
-  </style>
+  .panel{background:linear-gradient(180deg,rgba(28,36,64,.72),rgba(12,16,28,.88));
+         border:1px solid var(--line);border-radius:18px;padding:16px}
+  .panel-head{display:flex;justify-content:space-between;align-items:center;
+              gap:10px;margin-bottom:16px;flex-wrap:wrap}
+  .panel-head h2{font-size:13.5px;margin:0;letter-spacing:1.4px;color:#cfd8f5;font-weight:800}
+  .head-right{display:flex;gap:8px;align-items:center}
+  .counter{font-size:13px;color:var(--muted);background:#0d1324;
+           border:1px solid var(--line);padding:7px 14px;border-radius:999px;font-weight:700}
+  .counter b{color:var(--brand-2);font-size:15px}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:12px}
+  @media(max-width:420px){.grid{grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:9px}}
+
+  .item{position:relative;background:#0d1324;border:1px solid var(--line);
+        border-radius:14px;padding:9px 8px;display:flex;flex-direction:column;
+        align-items:center;gap:8px;transition:transform .18s,border-color .18s;
+        animation:pop .25s ease}
+  @keyframes pop{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:none}}
+  .item:hover{border-color:rgba(124,92,255,.65);transform:translateY(-3px);
+              box-shadow:0 12px 26px rgba(0,0,0,.45)}
+  .thumb{width:100%;aspect-ratio:1/1;border-radius:10px;overflow:hidden;
+         background:radial-gradient(circle at 50% 38%,#1d2748,#0a0f1d);
+         display:grid;place-items:center}
+  .thumb img{width:100%;height:100%;object-fit:contain;display:block}
+  .thumb .ph{font-size:30px;opacity:.45}
+  .item-id{font-size:11px;color:#9fb0d8;font-weight:700;word-break:break-all;
+           text-align:center;line-height:1.3}
+
+  .item-del{
+    position:absolute;top:6px;right:6px;width:25px;height:25px;border-radius:9px;
+    border:0;background:rgba(255,77,109,.16);color:#ff6b85;cursor:pointer;
+    font-size:12px;display:grid;place-items:center;opacity:0;
+    transition:opacity .18s,background .18s;line-height:1;
+  }
+  .item:hover .item-del{opacity:1}
+  .item-del:hover{background:rgba(255,77,109,.4);color:#fff}
+  @media(hover:none){.item-del{opacity:1}}
+
+  .empty{text-align:center;padding:46px 12px;color:var(--muted);
+         font-size:13.5px;line-height:1.7}
+  .empty .big{font-size:42px;display:block;margin-bottom:12px;opacity:.5}
+  .empty b{color:var(--brand-2)}
+
+  #toast{
+    position:fixed;left:50%;bottom:26px;transform:translate(-50%,24px);
+    background:#1c2440;border:1px solid var(--line);color:#fff;
+    padding:13px 22px;border-radius:13px;font-size:13px;font-weight:700;
+    opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;
+    z-index:9999;box-shadow:0 14px 34px rgba(0,0,0,.55);
+    max-width:90vw;text-align:center;
+  }
+  #toast.show{opacity:1;transform:translate(-50%,0)}
+  #toast.err{background:#2a1220;border-color:#5a2136;color:#ff8fa3}
+  #toast.ok{background:#0d2a22;border-color:#175c4a;color:#5cf2c0}
+</style>
 </head>
 <body>
-  <main class="card">
-    <!-- TRANG 1 -->
-    <section id="page1">
-      <h1>Wishlist Portal</h1>
-      <p>Nhập JWT token để tiếp tục đến trang Wishlist.</p>
 
-      <form id="tokenForm">
-        <input
-          id="jwtInput"
-          type="password"
-          placeholder="Nhập JWT token"
-          autocomplete="off"
-          required
-        >
-        <button type="submit">Tiếp tục</button>
-      </form>
+<!-- TRANG 1 -->
+<section id="page-login" class="page active">
+  <div class="auth">
+    <div class="brand-badge">🔰</div>
+    <h1 class="title">QUẢN LÝ WISHLIST</h1>
+    <p class="sub">Quản lý &amp; Thêm &amp; Xóa Wishlist</p>
 
-      <p id="error" class="status" role="alert"></p>
-    </section>
+    <div class="field">
+      <label for="uidInput">UID GUEST</label>
+      <div class="row">
+        <input id="uidInput" type="text" placeholder="Nhập UID..." autocomplete="off" />
+        <button class="btn ghost" id="btnFillUid" type="button">Điền</button>
+      </div>
+    </div>
 
-    <!-- TRANG 2 -->
-    <section id="page2" class="hidden">
-      <h1>Wishlist</h1>
-      <p id="status" class="status" role="status">
-        Đang chuẩn bị chuyển trang...
-      </p>
-      <button id="openWishlist">Mở Wishlist</button>
-      <button id="backButton">Quay lại</button>
-    </section>
-  </main>
+    <div class="field">
+      <label for="pwdInput">PASSWORD GUEST</label>
+      <div class="row">
+        <input id="pwdInput" type="password" placeholder="Nhập Password..." autocomplete="off" />
+        <button class="btn ghost" id="btnFillPwd" type="button">Điền</button>
+      </div>
+    </div>
 
-  <script>
-    const WISHLIST_URL =
-      "https://wishlist-banner.vercel.app/wishlist";
+    <div class="toggle-box" id="jwtToggle">
+      <span>🔑 Đăng nhập bằng JWT có sẵn</span>
+      <span class="arrow">▾</span>
+    </div>
+    <div class="toggle-body" id="jwtBody">
+      <div class="field" style="margin-bottom:6px">
+        <label for="tokenInput">TOKEN JWT <span class="optional">— dán từ game</span></label>
+        <input id="tokenInput" type="text" placeholder="eyJhbGciOi..." autocomplete="off" />
+      </div>
+    </div>
 
-    const page1 = document.getElementById("page1");
-    const page2 = document.getElementById("page2");
-    const input = document.getElementById("jwtInput");
-    const error = document.getElementById("error");
-    const status = document.getElementById("status");
+    <div class="toggle-box" id="advToggle">
+      <span>⚙️ Cấu hình nâng cao</span>
+      <span class="arrow">▾</span>
+    </div>
+    <div class="toggle-body" id="advBody">
+      <div class="field" style="margin-bottom:6px">
+        <label for="syncEndpointInput">Endpoint lấy Wishlist <span class="optional">(tùy chọn)</span></label>
+        <input id="syncEndpointInput" type="text" placeholder="/get-wish" autocomplete="off" />
+      </div>
+      <div class="field" style="margin-bottom:6px">
+        <label for="loginEndpointInput">Endpoint đăng nhập <span class="optional">(tùy chọn)</span></label>
+        <input id="loginEndpointInput" type="text" placeholder="/login" autocomplete="off" />
+      </div>
+      <div class="field" style="margin-bottom:6px">
+        <label for="proxyInput">Proxy URL <span class="optional">(mặc định: cùng domain)</span></label>
+        <input id="proxyInput" type="text" placeholder="" autocomplete="off" />
+      </div>
+    </div>
 
-    let currentToken = "";
+    <button class="btn primary block" id="btnLogin" type="button">ĐĂNG NHẬP WISHLIST</button>
+    <p class="hint">Gợi ý: UID <b>Guest</b> · PASSWORD <b>Guest</b></p>
+  </div>
+</section>
 
-    function showPage2(token) {
-      currentToken = token.trim();
+<!-- TRANG 2 -->
+<section id="page-manager" class="page">
+  <div class="shell">
+    <div class="topbar">
+      <div>
+        <h1 class="head-title">QUẢN LÝ WISHLIST</h1>
+        <p class="head-sub">Quản lý &amp; Thêm &amp; Xóa Wishlist</p>
+      </div>
+      <button class="btn ghost" id="btnLogout" type="button">Đăng xuất</button>
+    </div>
 
-      if (!currentToken) {
-        error.textContent = "Vui lòng nhập token.";
-        return;
+    <div class="status-bar">
+      <span class="dot" id="statusDot"></span>
+      <span id="statusText">Chưa kết nối</span>
+      <b style="margin-left:auto;font-size:11px" id="statusToken">—</b>
+    </div>
+
+    <div class="tools">
+      <div class="tool">
+        <label class="tool-label" for="addInput">Nhập Thêm Item</label>
+        <div class="row">
+          <input id="addInput" type="text" placeholder="ID hoặc link... vd: 909055018" autocomplete="off" />
+          <button class="btn ok" id="btnAdd" type="button">Thêm</button>
+        </div>
+        <div class="preview" id="addPreview"></div>
+      </div>
+      <div class="tool">
+        <label class="tool-label" for="removeInput">Nhập Xóa Item</label>
+        <div class="row">
+          <input id="removeInput" type="text" placeholder="ID item cần xóa..." autocomplete="off" />
+          <button class="btn danger" id="btnRemove" type="button">Xóa</button>
+        </div>
+        <div class="preview" id="removePreview"></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <h2>DANH SÁCH MONG MUỐN</h2>
+        <div class="head-right">
+          <button class="btn ghost mini" id="btnRefresh" type="button" title="Tải lại">↻</button>
+          <span class="counter"><b id="countItems">0</b>/100</span>
+        </div>
+      </div>
+      <div class="grid" id="grid"></div>
+      <div class="empty" id="empty">
+        <span class="big">🎁</span>
+        Chưa có item nào trong danh sách.<br />
+        Nhập ID ở trên rồi bấm <b>Thêm</b>.
+      </div>
+    </div>
+  </div>
+</section>
+
+<div id="toast"></div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* Cấu hình */
+  var ICON_BASE = 'https://kingofgames02.github.io/Free-Fire-Items-Library/ff-icons/';
+  var MAX_ITEMS = 100;
+  var ID_REGEX  = /^\d{5,12}$/;
+  var PARSE_REGEX = /\d{5,12}/g;
+  var SESSION_KEY = 'danger_wishlist_v5';
+
+  /* DOM */
+  var $ = function(s){ return document.querySelector(s); };
+  var pageLogin   = $('#page-login');
+  var pageManager = $('#page-manager');
+  var uidInput = $('#uidInput'), pwdInput = $('#pwdInput'), tokenInput = $('#tokenInput');
+  var btnFillUid = $('#btnFillUid'), btnFillPwd = $('#btnFillPwd');
+  var btnLogin = $('#btnLogin'), btnLogout = $('#btnLogout');
+  var jwtToggle = $('#jwtToggle'), jwtBody = $('#jwtBody');
+  var advToggle = $('#advToggle'), advBody = $('#advBody');
+  var syncEndpointInput = $('#syncEndpointInput');
+  var loginEndpointInput = $('#loginEndpointInput');
+  var proxyInput = $('#proxyInput');
+  var addInput = $('#addInput'), addPreview = $('#addPreview'), btnAdd = $('#btnAdd');
+  var removeInput = $('#removeInput'), removePreview = $('#removePreview'), btnRemove = $('#btnRemove');
+  var gridEl = $('#grid'), emptyEl = $('#empty'), countEl = $('#countItems'), btnRefresh = $('#btnRefresh');
+  var statusDot = $('#statusDot'), statusText = $('#statusText'), statusToken = $('#statusToken');
+
+  /* State */
+  var state = {
+    uid: '', password: '', token: '', items: [],
+    syncEndpoint: '', loginEndpoint: '', proxy: ''
+  };
+  var toastTimer = null;
+  var syncing = false;
+
+  /* Tiện ích */
+  function toast(msg, type){
+    var t = $('#toast');
+    t.textContent = msg;
+    t.className = 'show' + (type ? ' '+type : '');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ t.className=''; }, 3200);
+  }
+
+  function parseIds(raw){
+    if(!raw) return [];
+    var found = String(raw).match(PARSE_REGEX) || [];
+    var seen = Object.create(null), out = [];
+    for(var i=0;i<found.length;i++){
+      if(!seen[found[i]]){ seen[found[i]]=true; out.push(found[i]); }
+    }
+    return out;
+  }
+  function isId(v){ return typeof v==='string' && ID_REGEX.test(v); }
+
+  /** URL gốc của proxy: ưu tiên ô nhập, sau đó cùng origin */
+  function proxyBase(){
+    var p = (state.proxy || '').trim();
+    if(p) return p.replace(/\/$/, '');
+    return window.location.origin;
+  }
+
+  /* Lưu trữ */
+  function keyFor(uid){ return 'dw_items_' + (uid || 'anon'); }
+  function persist(){ try{ localStorage.setItem(keyFor(state.uid), JSON.stringify(state.items)); }catch(e){} }
+  function loadItems(uid){
+    try{
+      var raw = JSON.parse(localStorage.getItem(keyFor(uid)) || '[]');
+      return Array.isArray(raw) ? raw.map(String).filter(isId) : [];
+    }catch(e){ return []; }
+  }
+  function saveSession(){
+    try{
+      localStorage.setItem(SESSION_KEY, JSON.stringify({
+        uid: state.uid, password: state.password, token: state.token,
+        syncEndpoint: state.syncEndpoint, loginEndpoint: state.loginEndpoint,
+        proxy: state.proxy
+      }));
+    }catch(e){}
+  }
+  function readSession(){
+    try{ return JSON.parse(localStorage.getItem(SESSION_KEY) || 'null'); }catch(e){ return null; }
+  }
+  function clearSession(){ try{ localStorage.removeItem(SESSION_KEY); }catch(e){} }
+
+  /* Gọi proxy */
+  function apiCall(endpoint, payload, method){
+    method = method || 'POST';
+    var url = proxyBase() + endpoint;
+    return fetch(url, {
+      method: method,
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: method === 'POST' ? JSON.stringify(payload) : undefined
+    })
+    .then(function(r){
+      return r.text().then(function(txt){
+        var data;
+        try{ data = JSON.parse(txt); }catch(e){ data = { raw: txt }; }
+        return { ok: r.ok, status: r.status, data: data };
+      });
+    });
+  }
+
+  /* Cập nhật status bar */
+  function updateStatus(text, mode){
+    statusText.textContent = text;
+    statusDot.className = 'dot';
+    if(mode === 'online') statusDot.classList.add('on');
+    else if(mode === 'offline') statusDot.classList.add('off');
+
+    if(state.token){
+      var s = state.token.length > 24
+        ? state.token.slice(0,12) + '…' + state.token.slice(-8)
+        : state.token;
+      statusToken.textContent = '🔑 ' + s;
+      statusToken.style.color = '#7cff9f';
+    }else{
+      statusToken.textContent = '🔑 (UID/Password)';
+      statusToken.style.color = '#8b96b8';
+    }
+  }
+
+  /* Render */
+  function createCard(id){
+    var el = document.createElement('div');
+    el.className = 'item';
+
+    var thumb = document.createElement('div');
+    thumb.className = 'thumb';
+
+    var img = document.createElement('img');
+    img.alt = id;
+    img.loading = 'lazy';
+    img.referrerPolicy = 'no-referrer';
+    img.src = ICON_BASE + encodeURIComponent(id) + '.png';
+
+    img.onerror = function(){
+      this.onerror = null;
+      var ph = document.createElement('div');
+      ph.className = 'ph';
+      ph.style.cssText = 'display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px';
+      ph.innerHTML = '<span style="font-size:24px">🎁</span>' +
+        '<span style="font-size:9px;color:#9fb0d8;font-weight:700;word-break:break-all;' +
+        'text-align:center;line-height:1.2">' + id + '</span>';
+      thumb.replaceChildren(ph);
+    };
+    thumb.appendChild(img);
+
+    var label = document.createElement('div');
+    label.className = 'item-id';
+    label.textContent = id;
+
+    var del = document.createElement('button');
+    del.type = 'button';
+    del.className = 'item-del';
+    del.title = 'Xóa';
+    del.textContent = '✕';
+    del.addEventListener('click', function(){ removeIds([id]); });
+
+    el.appendChild(thumb);
+    el.appendChild(label);
+    el.appendChild(del);
+    return el;
+  }
+
+  function render(){
+    countEl.textContent = String(state.items.length);
+    gridEl.innerHTML = '';
+    if(!state.items.length){ emptyEl.style.display='block'; return; }
+    emptyEl.style.display = 'none';
+    var frag = document.createDocumentFragment();
+    for(var i=0;i<state.items.length;i++) frag.appendChild(createCard(state.items[i]));
+    gridEl.appendChild(frag);
+  }
+
+  /* Đồng bộ từ server */
+  function syncFromServer(showToast){
+    if(syncing) return;
+    syncing = true;
+    updateStatus('Đang tải wishlist...', 'pending');
+
+    var payload = {};
+    if(state.token) payload.token = state.token;
+    else { payload.uid = state.uid; payload.password = state.password; }
+    if(state.syncEndpoint) payload.customEndpoint = state.syncEndpoint;
+
+    apiCall('/api/wishlist', payload)
+      .then(function(r){
+        syncing = false;
+        if(r.ok && r.data && r.data.success){
+          state.items = (r.data.items || []).slice(0, MAX_ITEMS);
+          persist(); render();
+          updateStatus('Đã đồng bộ ' + state.items.length + ' item (' + r.data.via + ')', 'online');
+          if(showToast) toast('Đã tải ' + state.items.length + ' item từ server ✓', 'ok');
+        }else{
+          var msg = (r.data && r.data.error) || 'Không lấy được wishlist';
+          updateStatus('Lỗi: ' + msg, 'offline');
+          if(showToast) toast(msg, 'err');
+          // Thử hiển thị cache
+          state.items = loadItems(state.uid); render();
+        }
+      })
+      .catch(function(err){
+        syncing = false;
+        updateStatus('Không kết nối proxy (' + err.message + ')', 'offline');
+        if(showToast) toast('Không kết nối được proxy — kiểm tra server.js đã chạy chưa', 'err');
+        state.items = loadItems(state.uid); render();
+      });
+  }
+
+  /* Thêm / Xóa */
+  function handleAdd(){
+    var ids = parseIds(addInput.value);
+    if(!ids.length){ toast('Không nhận dạng được ID hợp lệ', 'err'); addInput.focus(); return; }
+    var fresh = ids.filter(function(id){ return state.items.indexOf(id)===-1; });
+    if(!fresh.length){ toast('Item đã có trong danh sách', 'err'); return; }
+    if(state.items.length + fresh.length > MAX_ITEMS){ toast('Tối đa ' + MAX_ITEMS, 'err'); return; }
+
+    btnAdd.disabled = true;
+
+    // Gọi proxy thêm
+    var params = { path: '/add-wish', item_ids: fresh.join(',') };
+    if(state.token) params.token = state.token;
+    else { params.uid = state.uid; params.password = state.password; }
+
+    var url = proxyBase() + '/proxy?' + new URLSearchParams(params).toString();
+
+    fetch(url).then(function(r){ return r.json(); })
+      .then(function(res){
+        if(res.ok){
+          toast('Đã thêm ' + fresh.length + ' item ✓', 'ok');
+          // Cập nhật UI + reload từ server
+          state.items = state.items.concat(fresh); persist(); render();
+          syncFromServer(false);
+        }else{
+          toast('API lỗi (' + res.status + '): ' + JSON.stringify(res.data).slice(0,100), 'err');
+        }
+      })
+      .catch(function(err){
+        toast('Lỗi proxy: ' + err.message, 'err');
+      })
+      .then(function(){
+        btnAdd.disabled = false;
+        addInput.value = ''; updatePreview(addInput, addPreview);
+      });
+  }
+
+  function handleRemove(){
+    var ids = parseIds(removeInput.value);
+    if(!ids.length){ toast('Không nhận dạng được ID hợp lệ', 'err'); removeInput.focus(); return; }
+    var exist = ids.filter(function(id){ return state.items.indexOf(id)!==-1; });
+    if(!exist.length){ toast('Các ID này không có trong danh sách', 'err'); return; }
+    removeInput.value = ''; updatePreview(removeInput, removePreview);
+    removeIds(exist);
+  }
+
+  function removeIds(ids){
+    var exist = ids.filter(function(id){ return state.items.indexOf(id)!==-1; });
+    if(!exist.length){ toast('Item không tồn tại', 'err'); return; }
+
+    var params = { path: '/remove-wish', item_ids: exist.join(',') };
+    if(state.token) params.token = state.token;
+    else { params.uid = state.uid; params.password = state.password; }
+
+    var url = proxyBase() + '/proxy?' + new URLSearchParams(params).toString();
+
+    toast('Đang xóa...');
+
+    fetch(url).then(function(r){ return r.json(); })
+      .then(function(res){
+        if(res.ok){
+          toast('Đã xóa ' + exist.length + ' item ✓', 'ok');
+          state.items = state.items.filter(function(id){ return exist.indexOf(id)===-1; });
+          persist(); render();
+          syncFromServer(false);
+        }else{
+          toast('API lỗi: ' + JSON.stringify(res.data).slice(0,100), 'err');
+        }
+      })
+      .catch(function(err){ toast('Lỗi proxy: ' + err.message, 'err'); });
+  }
+
+  function updatePreview(input, previewEl){
+    var ids = parseIds(input.value);
+    if(!ids.length){ previewEl.textContent = ''; return; }
+    var show = ids.slice(0,6).join(', ');
+    if(ids.length > 6) show += ' …';
+    previewEl.textContent = '✓ Nhận dạng ' + ids.length + ' ID: ' + show;
+  }
+
+  /* Điều hướng */
+  function showLogin(){
+    pageManager.classList.remove('active');
+    pageLogin.classList.add('active');
+    window.scrollTo(0,0);
+  }
+  function showManager(){
+    pageLogin.classList.remove('active');
+    pageManager.classList.add('active');
+    render();
+    updateStatus('Sẵn sàng', state.token ? 'online' : 'pending');
+    setTimeout(function(){ syncFromServer(false); }, 200);
+    window.scrollTo(0,0);
+  }
+
+  /* LOGIN */
+  function doLogin(){
+    var uid = uidInput.value.trim();
+    var pwd = pwdInput.value.trim();
+    var manualToken = tokenInput.value.trim();
+
+    // Lưu cấu hình
+    state.syncEndpoint  = syncEndpointInput.value.trim();
+    state.loginEndpoint = loginEndpointInput.value.trim();
+    state.proxy         = proxyInput.value.trim();
+
+    // 1. Có JWT dán sẵn
+    if(manualToken){
+      state.token = manualToken;
+      state.uid = uid || 'guest';
+      state.password = pwd || '';
+      state.items = loadItems(state.uid);
+      saveSession();
+      toast('Đã đăng nhập bằng JWT ✓', 'ok');
+      showManager();
+      return;
+    }
+
+    // 2. Cần uid/password
+    if(!uid){ toast('Vui lòng nhập UID GUEST', 'err'); uidInput.focus(); return; }
+    if(!pwd){ toast('Vui lòng nhập PASSWORD GUEST', 'err'); pwdInput.focus(); return; }
+
+    state.uid = uid;
+    state.password = pwd;
+    state.token = '';
+
+    btnLogin.disabled = true;
+    btnLogin.textContent = 'ĐANG ĐĂNG NHẬP...';
+
+    var payload = { uid: uid, password: pwd };
+    if(state.loginEndpoint) payload.customEndpoint = state.loginEndpoint;
+
+    apiCall('/api/login', payload)
+      .then(function(r){
+        if(r.ok && r.data && r.data.success){
+          state.token = r.data.token;
+          saveSession();
+          toast('Đăng nhập thành công — đã nhận JWT ✓', 'ok');
+          showManager();
+        }else{
+          var err = (r.data && r.data.error) || 'Không lấy được JWT';
+          toast(err + ' — sẽ dùng UID/Password', 'err');
+          state.items = loadItems(state.uid);
+          saveSession();
+          showManager();
+        }
+      })
+      .catch(function(e){
+        toast('Không kết nối proxy (' + e.message + ') — kiểm tra server.js', 'err');
+        state.items = loadItems(state.uid);
+        showManager();
+      })
+      .then(function(){
+        btnLogin.disabled = false;
+        btnLogin.textContent = 'ĐĂNG NHẬP WISHLIST';
+      });
+  }
+
+  function doLogout(){
+    clearSession();
+    state.uid = ''; state.password = ''; state.token = ''; state.items = [];
+    state.syncEndpoint = ''; state.loginEndpoint = ''; state.proxy = '';
+    uidInput.value = ''; pwdInput.value = ''; tokenInput.value = '';
+    syncEndpointInput.value = ''; loginEndpointInput.value = ''; proxyInput.value = '';
+    showLogin();
+    toast('Đã đăng xuất', 'ok');
+  }
+
+  /* Sự kiện */
+  jwtToggle.addEventListener('click', function(){
+    jwtToggle.classList.toggle('open'); jwtBody.classList.toggle('open');
+  });
+  advToggle.addEventListener('click', function(){
+    advToggle.classList.toggle('open'); advBody.classList.toggle('open');
+  });
+
+  btnFillUid.addEventListener('click', function(){ uidInput.value='Guest'; uidInput.focus(); });
+  btnFillPwd.addEventListener('click', function(){ pwdInput.value='Guest'; pwdInput.focus(); });
+
+  btnLogin.addEventListener('click', doLogin);
+  pwdInput.addEventListener('keydown', function(e){ if(e.key==='Enter') doLogin(); });
+  uidInput.addEventListener('keydown', function(e){ if(e.key==='Enter') pwdInput.focus(); });
+  tokenInput.addEventListener('keydown', function(e){ if(e.key==='Enter') doLogin(); });
+
+  btnLogout.addEventListener('click', doLogout);
+
+  btnAdd.addEventListener('click', handleAdd);
+  addInput.addEventListener('keydown', function(e){ if(e.key==='Enter') handleAdd(); });
+  addInput.addEventListener('input', function(){ updatePreview(addInput, addPreview); });
+
+  btnRemove.addEventListener('click', handleRemove);
+  removeInput.addEventListener('keydown', function(e){ if(e.key==='Enter') handleRemove(); });
+  removeInput.addEventListener('input', function(){ updatePreview(removeInput, removePreview); });
+
+  btnRefresh.addEventListener('click', function(){
+    syncFromServer(true);
+    toast('Đang tải lại...');
+  });
+
+  /* Khởi động */
+  (function init(){
+    var s = readSession();
+    if(s && (s.token || (s.uid && s.password))){
+      uidInput.value = s.uid || '';
+      pwdInput.value = s.password || '';
+      tokenInput.value = s.token || '';
+      syncEndpointInput.value = s.syncEndpoint || '';
+      loginEndpointInput.value = s.loginEndpoint || '';
+      proxyInput.value = s.proxy || '';
+      if(s.token){ jwtToggle.classList.add('open'); jwtBody.classList.add('open'); }
+      if(s.syncEndpoint || s.loginEndpoint || s.proxy){
+        advToggle.classList.add('open'); advBody.classList.add('open');
       }
-
-      page1.classList.add("hidden");
-      page2.classList.remove("hidden");
-
-      status.textContent =
-        "Đã nhận token. Nhấn Mở Wishlist để tiếp tục.";
-
-      history.replaceState(
-        { page: 2 },
-        "",
-        location.pathname + "#wishlist"
-      );
+      state.uid = s.uid || '';
+      state.password = s.password || '';
+      state.token = s.token || '';
+      state.syncEndpoint = s.syncEndpoint || '';
+      state.loginEndpoint = s.loginEndpoint || '';
+      state.proxy = s.proxy || '';
+      state.items = loadItems(state.uid || 'anon');
+      showManager();
+    }else{
+      showLogin();
     }
+  })();
 
-    function openWishlist() {
-      if (!currentToken) return;
-
-      const destination = new URL(WISHLIST_URL);
-
-      destination.searchParams.set(
-        "jwt_token",
-        currentToken
-      );
-
-      // Không tự động thêm action=unban.
-      // Không ghi token vào localStorage hoặc console.
-      window.location.assign(destination.href);
-    }
-
-    document.getElementById("tokenForm")
-      .addEventListener("submit", function (event) {
-        event.preventDefault();
-        error.textContent = "";
-        showPage2(input.value);
-      });
-
-    document.getElementById("openWishlist")
-      .addEventListener("click", openWishlist);
-
-    document.getElementById("backButton")
-      .addEventListener("click", function () {
-        currentToken = "";
-        input.value = "";
-        page2.classList.add("hidden");
-        page1.classList.remove("hidden");
-      });
-
-    // Nhận diện token nếu URL hiện tại có jwt_token.
-    const params = new URLSearchParams(location.search);
-    const urlToken = params.get("jwt_token");
-
-    if (urlToken && urlToken !== "YOUR_JWT") {
-      showPage2(urlToken);
-    }
-  </script>
+})();
+</script>
 </body>
-</html>
+  </html>
