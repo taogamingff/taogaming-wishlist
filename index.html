@@ -2,303 +2,168 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Free Fire Wishlist</title>
-<style>end riêng. Không nhập mật khẩu game.</footer>
-</main>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Wishlist Portal</title>
+  <style>
+    * { box-sizing: border-box; }
 
-<script>
-'use strict';
-const API_BASE = 'https://taogaming-wishlist.vercel.app/
-*{box-sizing:border-box}
-body{margin:0;background:#0a1020;color:#f5f7ff;font:16px system-ui,Arial}
-main{width:min(950px,94%);margin:auto;padding:25px 0}
-header{text-align:center;margin-bottom:25px}
-.logo{font-size:30px;font-weight:900;color:#62baff}
-.panel{background:#151e30;border:1px solid #2b3952;border-radius:16px;padding:20px;margin-bottom:16px}
-h2{margin:0 0 16px;font-size:21px}
-label{display:block;margin:12px 0 7px;color:#c3cee0}
-input{width:100%;padding:13px;border-radius:10px;border:1px solid #34435d;background:#0a1221;color:white;font:inherit}
-button{border:0;border-radius:10px;padding:12px 15px;color:white;background:linear-gradient(100deg,#1688fa,#6856ed);font:inherit;font-weight:700;cursor:pointer}
-button:disabled{opacity:.5}
-.secondary{background:#30405b}.danger{background:#b52f48}
-.full{width:100%;margin-top:14px}
-.hidden{display:none!important}
-.row{display:flex;gap:10px;justify-content:space-between;align-items:center;flex-wrap:wrap}
-.formrow{display:flex;gap:10px}.formrow input{flex:1;min-width:0}
-.muted,.hint{color:#9eacc2}.hint{font-size:13px;line-height:1.6}
-.status{font-size:14px;margin-top:12px;overflow-wrap:anywhere}
-.error{color:#ff8796}.success{color:#76e3ad}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:12px}
-.item{background:#0b1424;border:1px solid #2b3952;border-radius:12px;padding:10px;min-width:0}
-.item img{width:100%;aspect-ratio:1;object-fit:contain;background:#1a263c;border-radius:8px}
-.item .id{text-align:center;font-weight:800;margin:10px 0}
-.actions{display:grid;gap:7px}.actions button{font-size:12px;padding:9px 5px}
-.empty{text-align:center;padding:28px;border:1px dashed #34435d;border-radius:12px;color:#9eacc2}
-footer{text-align:center;color:#71819a;font-size:12px;padding:20px}
-@media(max-width:480px){.panel{padding:15px}.formrow{flex-direction:column}.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-</style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+      font-family: Arial, sans-serif;
+      color: #f5f5f5;
+      background: #10131c;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 440px;
+      padding: 28px;
+      border: 1px solid #34394b;
+      border-radius: 18px;
+      background: #1a1f2d;
+    }
+
+    h1 { margin-top: 0; font-size: 25px; }
+    p { color: #c3c9d8; line-height: 1.6; }
+
+    input, button {
+      width: 100%;
+      padding: 13px;
+      margin-top: 12px;
+      border-radius: 9px;
+      font-size: 15px;
+    }
+
+    input {
+      color: white;
+      background: #10131c;
+      border: 1px solid #444b60;
+    }
+
+    button {
+      border: 0;
+      color: white;
+      background: #635bff;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    button:hover { background: #5148e5; }
+    .hidden { display: none; }
+    .status { overflow-wrap: anywhere; }
+    a { color: #a9b2ff; }
+  </style>
 </head>
 <body>
-<main>
-<header><div class="logo">🔥 FF WISHLIST</div><div class="muted">Wishlist đồng bộ nhiều thiết bị</div></header>
+  <main class="card">
+    <!-- TRANG 1 -->
+    <section id="page1">
+      <h1>Wishlist Portal</h1>
+      <p>Nhập JWT token để tiếp tục đến trang Wishlist.</p>
 
-<section id="authPage" class="panel">
-  <h2 id="authTitle">🔐 Đăng nhập Wishlist</h2>
-  <p class="hint">Đây là mật khẩu riêng của ứng dụng Wishlist, không phải mật khẩu Free Fire.</p>
-  <form id="authForm">
-    <label for="uid">UID</label>
-    <input id="uid" inputmode="numeric" pattern="[0-9]{1,30}" maxlength="30" required autocomplete="username" placeholder="Ví dụ: 4260182857">
-    <label for="password">Mật khẩu Wishlist</label>
-    <input id="password" type="password" minlength="10" maxlength="72" required autocomplete="current-password" placeholder="Ít nhất 10 ký tự">
-    <button class="full" id="authSubmit">Đăng nhập</button>
-  </form>
-  <button class="full secondary" id="toggleAuth" type="button">Tạo tài khoản Wishlist mới</button>
-  <div id="authStatus" class="status" role="status"></div>
-</section>
+      <form id="tokenForm">
+        <input
+          id="jwtInput"
+          type="password"
+          placeholder="Nhập JWT token"
+          autocomplete="off"
+          required
+        >
+        <button type="submit">Tiếp tục</button>
+      </form>
 
-<section id="appPage" class="hidden">
-  <div class="panel row">
-    <div><div class="muted">TÀI KHOẢN</div><b>UID: <span id="uidLabel"></span></b></div>
-    <button class="secondary" id="logout">Đăng xuất</button>
-  </div>
+      <p id="error" class="status" role="alert"></p>
+    </section>
 
-  <section class="panel">
-    <h2>➕ Gắn Wishlist</h2>
-    <form id="addForm">
-      <label for="itemId">ID ITEM</label>
-      <div class="formrow">
-        <input id="itemId" inputmode="numeric" maxlength="20" pattern="[0-9]{1,20}" required placeholder="Ví dụ: 907104745">
-        <button id="addBtn">Gắn Wishlist</button>
-      </div>
-    </form>
-    <div id="itemStatus" class="status" role="status"></div>
-    <p class="hint">Tối đa 100 item. Nếu ảnh không tải được, bạn vẫn có thể mở trang thư viện chính thức của item.</p>
-  </section>
+    <!-- TRANG 2 -->
+    <section id="page2" class="hidden">
+      <h1>Wishlist</h1>
+      <p id="status" class="status" role="status">
+        Đang chuẩn bị chuyển trang...
+      </p>
+      <button id="openWishlist">Mở Wishlist</button>
+      <button id="backButton">Quay lại</button>
+    </section>
+  </main>
 
-  <section class="panel">
-    <div class="row" style="margin-bottom:16px">
-      <h2 style="margin:0">⭐ DANH SÁCH MONG MUỐN</h2>
-      <b><span id="count">0</span>/100</b>
-    </div>
-    <button class="danger" id="clearAll" style="margin-bottom:15px">Xóa Wishlist tất cả</button>
-    <div id="grid" class="grid"></div>
-    <div id="empty" class="empty">Chưa có item nào.</div>
-  </section>
-</section>
-<footer>Wishlist dùng back.com';
-const LIBRARY_BASE = 'https://kingofgames02.github.io/Free-Fire-Items-Library/';
-const $ = id => document.getElementById(id);
-let token = sessionStorage.getItem('ffwl_token') || '';
-let uid = sessionStorage.getItem('ffwl_uid') || '';
-let registerMode = false;
-let items = [];
+  <script>
+    const WISHLIST_URL =
+      "https://wishlist-banner.vercel.app/wishlist";
 
-function setStatus(id, message, type='') {
-  $(id).textContent = message;
-  $(id).className = 'status ' + type;
-}
-async function api(path, options={}) {
-  if (API_BASE.includes('YOUR-RENDER-SERVICE')) {
-    throw new Error('Hãy sửa API_BASE thành URL Render thật.');
-  }
-  const headers = {'Content-Type':'application/json', ...(options.headers||{})};
-  if (token) headers.Authorization = 'Bearer ' + token;
-  const response = await fetch(API_BASE + path, {...options, headers});
-  const data = await response.json().catch(()=>({error:'Phản hồi máy chủ không hợp lệ.'}));
-  if (!response.ok) throw new Error(data.error || 'Yêu cầu thất bại.');
-  return data;
-}
-function showApp() {
-  $('authPage').classList.add('hidden');
-  $('appPage').classList.remove('hidden');
-  $('uidLabel').textContent = uid;
-}
-function showAuth() {
-  $('appPage').classList.add('hidden');
-  $('authPage').classList.remove('hidden');
-}
-async function loadItems() {
-  const data = await api('/api/wishlist');
-  items = data.items.map(x=>x.itemId);
-  render();
-}
-function render() {
-  $('count').textContent = items.length;
-  $('empty').classList.toggle('hidden', items.length > 0);
-  const grid = $('grid');
-  grid.replaceChildren();
+    const page1 = document.getElementById("page1");
+    const page2 = document.getElementById("page2");
+    const input = document.getElementById("jwtInput");
+    const error = document.getElementById("error");
+    const status = document.getElementById("status");
 
-  for (const id of items) {
-    const card = document.createElement('article');
-    card.className = 'item';
-    const img = document.createElement('img');
-    img.alt = 'Ảnh item ' + id;
-    img.loading = 'lazy';
-    // URL CDN mẫu; thay bằng URL ảnh đã xác minh nếu thư viện có định dạng khác.
-    img.src = 'https://cdn.jsdelivr.net/gh/AfnanTawsif/ff-catalog@main/Item-icons/' + encodeURIComponent(id) + '.webp';
-    img.onerror = () => { img.onerror=null; img.style.display='none'; };
+    let currentToken = "";
 
-    const label = document.createElement('div');
-    label.className = 'id';
-    label.textContent = 'ID: ' + id;
+    function showPage2(token) {
+      currentToken = token.trim();
 
-    const actions = document.createElement('div');
-    actions.className = 'actions';
-    const open = document.createElement('button');
-    open.className = 'secondary';
-    open.textContent = 'Mở thư viện';
-    open.addEventListener('click',()=>{
-      const url = new URL(LIBRARY_BASE);
-      url.searchParams.set('item', id);
-      window.open(url.toString(), '_blank', 'noopener,noreferrer');
-    });
-
-    const del = document.createElement('button');
-    del.className = 'danger';
-    del.textContent = 'Xóa item';
-    del.addEventListener('click', async()=>{
-      del.disabled = true;
-      try {
-        await api('/api/wishlist/' + encodeURIComponent(id), {method:'DELETE'});
-        items = items.filter(x=>x!==id);
-        render();
-        setStatus('itemStatus','Đã xóa item ' + id + '.','success');
-      } catch(e) {
-        setStatus('itemStatus',e.message,'error');
-        del.disabled = false;
+      if (!currentToken) {
+        error.textContent = "Vui lòng nhập token.";
+        return;
       }
-    });
-    actions.append(open,del);
-    card.append(img,label,actions);
-    grid.append(card);
-  }
-}
 
-$('toggleAuth').addEventListener('click',()=>{
-  registerMode = !registerMode;
-  $('authTitle').textContent = registerMode ? '🆕 Tạo tài khoản Wishlist' : '🔐 Đăng nhập Wishlist';
-  $('authSubmit').textContent = registerMode ? 'Tạo tài khoản' : 'Đăng nhập';
-  $('toggleAuth').textContent = registerMode ? 'Đã có tài khoản? Đăng nhập' : 'Tạo tài khoản Wishlist mới';
-  $('password').autocomplete = registerMode ? 'new-password' : 'current-password';
-  setStatus('authStatus','');
-});
+      page1.classList.add("hidden");
+      page2.classList.remove("hidden");
 
-$('authForm').addEventListener('submit', async e=>{
-  e.preventDefault();
-  const btn = $('authSubmit');
-  btn.disabled = true;
-  setStatus('authStatus','Đang kết nối máy chủ…');
-  try {
-    const data = await api('/api/auth/' + (registerMode?'register':'login'), {
-      method:'POST',
-      body:JSON.stringify({uid:$('uid').value.trim(),password:$('password').value})
-    });
-    token=data.token; uid=data.uid;
-    sessionStorage.setItem('ffwl_token',token);
-    sessionStorage.setItem('ffwl_uid',uid);
-    $('password').value='';
-    showApp();
-    await loadItems();
-    setStatus('itemStatus','Đã kết nối máy chủ.','success');
-  } catch(err) {
-    setStatus('authStatus',err.message,'error');
-  } finally {
-    btn.disabled=false;
-  }
-});
+      status.textContent =
+        "Đã nhận token. Nhấn Mở Wishlist để tiếp tục.";
 
-$('addForm').addEventListener('submit',async e=>{
-  e.preventDefault();
-  const id=$('itemId').value.trim();
-  $('addBtn').disabled=true;
-  try {
-    await api('/api/wishlist',{method:'POST',body:JSON.stringify({itemId:id})});
-    items.unshift(id); render(); $('itemId').value='';
-    setStatus('itemStatus','Đã thêm item '+id+'.','success');
-  } catch(err) { setStatus('itemStatus',err.message,'error'); }
-  finally { $('addBtn').disabled=false; }
-});
+      history.replaceState(
+        { page: 2 },
+        "",
+        location.pathname + "#wishlist"
+      );
+    }
 
-$('clearAll').addEventListener('click',async()=>{
-  if(!items.length){setStatus('itemStatus','Wishlist đang trống.');return;}
-  if(!confirm('Xóa toàn bộ Wishlist của tài khoản này?')) return;
-  $('clearAll').disabled=true;
-  try {
-    await api('/api/wishlist',{method:'DELETE'});
-    items=[];render();setStatus('itemStatus','Đã xóa toàn bộ Wishlist.','success');
-  } catch(e) {setStatus('itemStatus',e.message,'error');}
-  finally {$('clearAll').disabled=false;}
-});
+    function openWishlist() {
+      if (!currentToken) return;
 
-$('logout').addEventListener('click',()=>{
-  token='';uid='';items=[];
-  sessionStorage.removeItem('ffwl_token');
-  sessionStorage.removeItem('ffwl_uid');
-  $('password').value='';
-  showAuth();
-  setStatus('authStatus','Bạn đã đăng xuất.');
-});
+      const destination = new URL(WISHLIST_URL);
 
-(async()=>{
-  if(!token||!uid)return;
-  try { await api('/api/me'); showApp(); await loadItems(); }
-  catch {
-    token='';uid='';
-    sessionStorage.removeItem('ffwl_token');
-    sessionStorage.removeItem('ffwl_uid');
-    showAuth();
-  }
-})();
-</script>
+      destination.searchParams.set(
+        "jwt_token",
+        currentToken
+      );
+
+      // Không tự động thêm action=unban.
+      // Không ghi token vào localStorage hoặc console.
+      window.location.assign(destination.href);
+    }
+
+    document.getElementById("tokenForm")
+      .addEventListener("submit", function (event) {
+        event.preventDefault();
+        error.textContent = "";
+        showPage2(input.value);
+      });
+
+    document.getElementById("openWishlist")
+      .addEventListener("click", openWishlist);
+
+    document.getElementById("backButton")
+      .addEventListener("click", function () {
+        currentToken = "";
+        input.value = "";
+        page2.classList.add("hidden");
+        page1.classList.remove("hidden");
+      });
+
+    // Nhận diện token nếu URL hiện tại có jwt_token.
+    const params = new URLSearchParams(location.search);
+    const urlToken = params.get("jwt_token");
+
+    if (urlToken && urlToken !== "YOUR_JWT") {
+      showPage2(urlToken);
+    }
+  </script>
 </body>
 </html>
-''',
-"README.md": r'''# Free Fire Wishlist — GitHub Pages + Render + PostgreSQL
-
-## Cấu trúc
-- `public/index.html`: giao diện tĩnh cho GitHub Pages.
-- `server.js`: API Node.js/Express trên Render.
-- PostgreSQL: tài khoản ứng dụng và Wishlist dùng chung giữa thiết bị.
-- `package.json`: dependencies và lệnh khởi chạy.
-
-## Triển khai Render
-1. Tạo PostgreSQL database trên Render.
-2. Tạo Web Service từ repository GitHub.
-3. Build command: `npm install`
-4. Start command: `npm start`
-5. Environment variables:
-   - `DATABASE_URL`: connection string PostgreSQL.
-   - `PGSSL`: `true` nếu nhà cung cấp yêu cầu SSL.
-   - `JWT_SECRET`: chuỗi ngẫu nhiên dài tối thiểu 32 ký tự.
-   - `FRONTEND_ORIGIN`: origin chính xác của GitHub Pages, ví dụ `https://TEN-GITHUB.github.io`.
-   - `ITEM_LIBRARY_BASE`: `https://kingofgames02.github.io/Free-Fire-Items-Library/`
-6. Deploy và kiểm tra `/api/health`.
-
-## Triển khai GitHub Pages
-1. Sửa `API_BASE` trong `public/index.html` thành URL Render thực.
-2. Repository → Settings → Pages → Deploy from a branch → `main` → `/public`.
-3. Kiểm tra `FRONTEND_ORIGIN` trên Render khớp origin Pages.
-
-## Quan trọng
-- Mật khẩu đăng nhập trong app này là mật khẩu Wishlist riêng, KHÔNG phải mật khẩu Free Fire.
-- Không gọi API guest-to-JWT bên thứ ba trong mã này.
-- URL `?item=ID` là trang thư viện, không phải ảnh trực tiếp. CDN mẫu trong giao diện chưa được xác minh; nếu không có ảnh, nút mở thư viện vẫn hoạt động.
-- UID không chứng minh quyền sở hữu tài khoản. Bất kỳ ai biết UID chưa đăng ký có thể đăng ký nó đầu tiên; với triển khai công khai cần thêm cơ chế xác minh/khôi phục tài khoản.
-- Không commit `.env`, JWT secret, hay database URL.
-'''
-}
-for rel, content in files.items():
-    path=os.path.join(base,rel)
-    os.makedirs(os.path.dirname(path),exist_ok=True)
-    with open(path,"w",encoding="utf-8") as f: f.write(content)
-zip_path="/mnt/data/FF-Wishlist-Source-Code.zip"
-with zipfile.ZipFile(zip_path,"w",zipfile.ZIP_DEFLATED) as z:
-    for root,dirs,names in os.walk(base):
-        for name in names:
-            p=os.path.join(root,name)
-            z.write(p,os.path.relpath(p,base))
-print(zip_path, os.path.getsize(zip_path), list(files.keys()))
-print("Server lines", sum(1 for _ in open(base+"/server.js")))
-print("HTML lines", sum(1 for _ in open(base+"/public/index.html")))
