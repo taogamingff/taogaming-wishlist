@@ -1,344 +1,304 @@
+/* =========================================================
+   WISHLIST PROXY SERVER
+   - Nhận request từ frontend (localhost:3000)
+   - Gọi API thật (danger-wishlist-manager.vercel.app)
+   - Trả JSON về, không bị CORS chặn
+   ========================================================= */
 
-import express from "express";
-import cors from "cors";
-import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
-import pg from "pg";
-import rateLimit from "express-rate-limit";
+const express = require('express');
+const cors    = require('cors');
+const fetch   = require('node-fetch');
+const path    = require('path');
 
-const app = express();
-const { Pool } = pg;
-
+const app  = express();
 const PORT = process.env.PORT || 3000;
-const JWT_SECRET = process.env.JWT_SECRET;
-const DATABASE_URL = process.env.DATABASE_URL;
 
-if (!JWT_SECRET || JWT_SECRET.length < 32 || !DATABASE_URL) {
-  throw new Error("Missing DATABASE_URL or secure JWT_SECRET");
-}
+const API_BASE = 'https://danger-wishlist-manager.vercel.app';
 
-const allowedOrigins = (process.env.FRONTEND_ORIGIN || "")
-  .split(",")
-  .map(x => x.trim())
-  .filter(Boolean);
+app.use(cors());
+app.use(express.json({ limit: '2mb' }));
+app.use(express.static(__dirname));   // phục vụ index.html
 
-const pool = new Pool({
-  connectionString: DATABASE_URL,
-  ssl: process.env.PGSSL === "true"
-    ? { rejectUnauthorized: false }
-    : undefined
-});
+/* =========================================================
+   TIỆN ÍCH
+   ========================================================= */
 
-app.set("trust proxy", 1);
-
-app.use(cors({
-  origin(origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    }
-    callback(new Error("Origin not allowed"));
-  },
-  methods: ["GET", "POST", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"]
-}));
-
-app.use(express.json({ limit: "10kb" }));
-
-app.use("/api/auth", rateLimit({
-  windowMs: 15 * 60 * 1000,
-  limit: 10,
-  standardHeaders: true,
-  legacyHeaders: false
-}));
-
-app.use("/api", rateLimit({
-  windowMs: 15 * 60 * 1000,
-  limit: 180,
-  standardHeaders: true,
-  legacyHeaders: false
-}));
-
-async function initializeDatabase() {
-  await pool.query(`
-    CREATE TABLE IF NOT EXISTS app_users (
-      id BIGSERIAL PRIMARY KEY,
-      uid VARCHAR(30) UNIQUE NOT NULL,
-      password_hash TEXT NOT NULL,
-      created_at TIMESTAMPTZ DEFAULT NOW()
-    );
-
-    CREATE TABLE IF NOT EXISTS wishlist_items (
-      id BIGSERIAL PRIMARY KEY,
-      user_id BIGINT NOT NULL
-        REFERENCES app_users(id) ON DELETE CASCADE,
-      item_id VARCHAR(20) NOT NULL,
-      created_at TIMESTAMPTZ DEFAULT NOW(),
-      UNIQUE(user_id, item_id)
-    );
-
-    CREATE INDEX IF NOT EXISTS wishlist_user_idx
-      ON wishlist_items(user_id);
-  `);
-}
-
-const asyncHandler = fn => (req, res, next) =>
-  Promise.resolve(fn(req, res, next)).catch(next);
-
-const validUid = value =>
-  typeof value === "string" && /^[0-9]{1,30}$/.test(value);
-
-const validItem = value =>
-  typeof value === "string" && /^[0-9]{1,20}$/.test(value);
-
-function createToken(user) {
-  return jwt.sign(
-    { uid: user.uid },
-    JWT_SECRET,
-    {
-      subject: String(user.id),
-      expiresIn: "7d",
-      issuer: "ff-wishlist"
-    }
-  );
-}
-
-function authenticate(req, res, next) {
-  const header = req.headers.authorization || "";
-  const match = header.match(/^Bearer (.+)$/i);
-
-  if (!match) {
-    return res.status(401).json({
-      error: "Vui lòng đăng nhập."
-    });
+/** Bóc JWT từ mọi kiểu response */
+function extractToken(data) {
+  if (!data) return null;
+  if (typeof data === 'string') {
+    const jwt = data.match(/[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}/);
+    if (jwt) return jwt[0];
+    if (data.length > 15 && !/\s/.test(data.trim())) return data.trim();
+    return null;
   }
+  if (typeof data !== 'object') return null;
+
+  const keys = ['token', 'jwt', 'access_token', 'accessToken', 'id_token', 'auth', 'authToken'];
+  for (const k of keys) {
+    if (typeof data[k] === 'string' && data[k].length > 15) return data[k].trim();
+  }
+  const nested = ['data', 'result', 'payload', 'user', 'session', 'auth'];
+  for (const n of nested) {
+    if (data[n] && typeof data[n] === 'object') {
+      const t = extractToken(data[n]);
+      if (t) return t;
+    }
+  }
+  for (const k in data) {
+    if (typeof data[k] === 'string') {
+      const jw = data[k].match(/[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}/);
+      if (jw) return jw[0];
+    }
+  }
+  return null;
+}
+
+/** Bóc mảng item_id từ mọi kiểu response */
+function extractIds(data) {
+  if (data === null || data === undefined) return null;
+  if (typeof data === 'string') {
+    const m = data.match(/\d{5,12}/g);
+    return m ? [...new Set(m)] : null;
+  }
+
+  let arr = null;
+  if (Array.isArray(data)) {
+    arr = data;
+  } else if (typeof data === 'object') {
+    const keys = ['items', 'wishlist', 'wish_list', 'wishlist_items',
+                  'data', 'list', 'result', 'item_ids', 'itemIds', 'ids'];
+    for (const k of keys) {
+      if (Array.isArray(data[k])) { arr = data[k]; break; }
+    }
+    if (!arr) {
+      for (const n of ['data', 'result', 'payload', 'wishlist']) {
+        if (data[n]) {
+          const t = extractIds(data[n]);
+          if (t) return t;
+        }
+      }
+    }
+    if (!arr) return null;
+  }
+  if (!arr) return null;
+
+  const out = new Set();
+  for (const it of arr) {
+    let v = null;
+    if (typeof it === 'string' || typeof it === 'number') v = String(it);
+    else if (it && typeof it === 'object') {
+      v = String(it.item_id ?? it.itemId ?? it.itemid ?? it.itemID ?? it.id ?? it.ID ?? it.item ?? '');
+    }
+    if (v && /^\d{5,12}$/.test(v)) out.add(v);
+  }
+  return [...out];
+}
+
+/** Gọi API thật (server-side, không bị CORS) */
+async function callUpstream(pathname, params, method = 'GET', body = null) {
+  const qs  = new URLSearchParams(params).toString();
+  const url = `${API_BASE}${pathname}${qs ? '?' + qs : ''}`;
+
+  const opts = {
+    method,
+    headers: {
+      'Accept': 'application/json, text/plain, */*',
+      'User-Agent': 'Mozilla/5.0 WishlistProxy/1.0'
+    }
+  };
+  if (method === 'POST' && body) {
+    opts.headers['Content-Type'] = 'application/json';
+    opts.body = JSON.stringify(body);
+  }
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 20000);
+  opts.signal = controller.signal;
 
   try {
-    req.user = jwt.verify(match[1], JWT_SECRET, {
-      issuer: "ff-wishlist"
-    });
-    next();
-  } catch {
-    res.status(401).json({
-      error: "Phiên đăng nhập hết hạn."
-    });
+    const res  = await fetch(url, opts);
+    const text = await res.text();
+    clearTimeout(timer);
+
+    let data;
+    try { data = JSON.parse(text); } catch { data = { raw: text }; }
+
+    return { ok: res.ok, status: res.status, url, data };
+  } catch (err) {
+    clearTimeout(timer);
+    return { ok: false, status: 0, url, data: null, error: err.message };
   }
 }
 
-app.get("/api/health", (req, res) => {
-  res.json({ ok: true, service: "FF Wishlist API" });
+/* =========================================================
+   API 1: /proxy  — proxy tổng quát
+   VD: /proxy?path=/add-wish&token=xxx&item_ids=1,2,3
+   ========================================================= */
+
+app.all('/proxy', async (req, res) => {
+  const pathname = req.query.path;
+  if (!pathname) return res.status(400).json({ error: 'Thiếu tham số ?path=' });
+
+  const params = { ...req.query };
+  delete params.path;
+
+  const method = req.method === 'POST' ? 'POST' : 'GET';
+  const body   = method === 'POST' ? req.body : null;
+
+  const result = await callUpstream(pathname, params, method, body);
+
+  res.status(result.ok ? 200 : (result.status || 502)).json({
+    ok: result.ok,
+    status: result.status,
+    upstreamUrl: result.url,
+    data: result.data,
+    error: result.error || null
+  });
 });
 
-// Đăng ký tài khoản Wishlist riêng.
-// password KHÔNG phải mật khẩu Free Fire.
-app.post("/api/auth/register", asyncHandler(async (req, res) => {
-  const { uid, password } = req.body || {};
+/* =========================================================
+   API 2: /api/login — tự dò endpoint login để lấy JWT
+   POST { uid, password, customEndpoint? }
+   ========================================================= */
 
-  if (!validUid(uid)) {
-    return res.status(400).json({
-      error: "UID phải gồm 1–30 chữ số."
-    });
+const LOGIN_CANDIDATES = [
+  '/login', '/api/login', '/auth', '/api/auth',
+  '/token', '/api/token', '/signin', '/api/signin',
+  '/user/login', '/api/user/login'
+];
+
+app.post('/api/login', async (req, res) => {
+  const { uid, password, customEndpoint } = req.body || {};
+  if (!uid || !password) {
+    return res.status(400).json({ error: 'Thiếu uid hoặc password' });
   }
 
-  if (
-    typeof password !== "string" ||
-    password.length < 10 ||
-    password.length > 72
-  ) {
-    return res.status(400).json({
-      error: "Mật khẩu Wishlist phải dài 10–72 ký tự."
-    });
-  }
+  const attempts = [];
+  if (customEndpoint) attempts.push(customEndpoint);
+  attempts.push(...LOGIN_CANDIDATES);
 
-  const hash = await bcrypt.hash(password, 12);
+  const results = [];
 
-  try {
-    const result = await pool.query(
-      `INSERT INTO app_users(uid, password_hash)
-       VALUES($1, $2)
-       RETURNING id, uid`,
-      [uid, hash]
-    );
+  for (const pathname of attempts) {
+    // Thử GET trước
+    let r = await callUpstream(pathname, { uid, password }, 'GET');
+    results.push({ path: pathname, method: 'GET', status: r.status });
 
-    const user = result.rows[0];
-
-    res.status(201).json({
-      token: createToken(user),
-      uid: user.uid
-    });
-  } catch (error) {
-    if (error.code === "23505") {
-      return res.status(409).json({
-        error: "UID đã đăng ký Wishlist."
-      });
+    if (r.ok) {
+      const token = extractToken(r.data);
+      if (token) {
+        return res.json({
+          success: true,
+          token,
+          via: `GET ${pathname}`,
+          raw: r.data,
+          attempts: results
+        });
+      }
     }
-    throw error;
-  }
-}));
 
-app.post("/api/auth/login", asyncHandler(async (req, res) => {
-  const { uid, password } = req.body || {};
+    // Thử POST nếu GET không được
+    r = await callUpstream(pathname, {}, 'POST', { uid, password });
+    results.push({ path: pathname, method: 'POST', status: r.status });
 
-  if (!validUid(uid) || typeof password !== "string") {
-    return res.status(400).json({
-      error: "Thông tin đăng nhập không hợp lệ."
-    });
-  }
-
-  const result = await pool.query(
-    "SELECT id, uid, password_hash FROM app_users WHERE uid = $1",
-    [uid]
-  );
-
-  const user = result.rows[0];
-
-  if (!user || !(await bcrypt.compare(password, user.password_hash))) {
-    return res.status(401).json({
-      error: "UID hoặc mật khẩu Wishlist không đúng."
-    });
+    if (r.ok) {
+      const token = extractToken(r.data);
+      if (token) {
+        return res.json({
+          success: true,
+          token,
+          via: `POST ${pathname}`,
+          raw: r.data,
+          attempts: results
+        });
+      }
+    }
   }
 
+  res.status(404).json({
+    success: false,
+    error: 'Không tìm thấy endpoint login nào trả JWT',
+    attempts: results
+  });
+});
+
+/* =========================================================
+   API 3: /api/wishlist — tự dò endpoint lấy wishlist
+   POST { token?, uid?, password?, customEndpoint? }
+   ========================================================= */
+
+const WISHLIST_CANDIDATES = [
+  '/get-wishlist', '/get-wish', '/wishlist', '/list-wish',
+  '/api/wishlist', '/api/get-wishlist', '/api/get-wish',
+  '/user/wishlist', '/me/wishlist', '/get'
+];
+
+app.post('/api/wishlist', async (req, res) => {
+  const { token, uid, password, customEndpoint } = req.body || {};
+
+  let auth;
+  if (token) auth = { token };
+  else if (uid && password) auth = { uid, password };
+  else return res.status(400).json({ error: 'Cần token hoặc (uid + password)' });
+
+  const attempts = [];
+  if (customEndpoint) attempts.push(customEndpoint);
+  attempts.push(...WISHLIST_CANDIDATES);
+
+  const results = [];
+
+  for (const pathname of attempts) {
+    const r = await callUpstream(pathname, auth, 'GET');
+    results.push({ path: pathname, status: r.status, ok: r.ok });
+
+    if (r.ok) {
+      const ids = extractIds(r.data);
+      if (ids !== null) {
+        return res.json({
+          success: true,
+          via: pathname,
+          items: ids,
+          count: ids.length,
+          raw: r.data,
+          attempts: results
+        });
+      }
+    }
+  }
+
+  res.status(404).json({
+    success: false,
+    error: 'Không tìm thấy endpoint wishlist nào',
+    attempts: results
+  });
+});
+
+/* =========================================================
+   API 4: /api/health — kiểm tra server sống
+   ========================================================= */
+
+app.get('/api/health', (req, res) => {
   res.json({
-    token: createToken(user),
-    uid: user.uid
-  });
-}));
-
-app.get("/api/me", authenticate, (req, res) => {
-  res.json({ uid: req.user.uid });
-});
-
-app.get("/api/wishlist", authenticate, asyncHandler(async (req, res) => {
-  const result = await pool.query(
-    `SELECT item_id AS "itemId",
-            created_at AS "createdAt"
-     FROM wishlist_items
-     WHERE user_id = $1
-     ORDER BY created_at DESC`,
-    [req.user.sub]
-  );
-
-  res.json({
-    items: result.rows,
-    limit: 100
-  });
-}));
-
-app.post("/api/wishlist", authenticate, asyncHandler(async (req, res) => {
-  const { itemId } = req.body || {};
-
-  if (!validItem(itemId)) {
-    return res.status(400).json({
-      error: "ID item phải gồm 1–20 chữ số."
-    });
-  }
-
-  const client = await pool.connect();
-
-  try {
-    await client.query("BEGIN");
-
-    // Khóa theo user để tránh vượt giới hạn khi có yêu cầu đồng thời.
-    await client.query(
-      "SELECT id FROM app_users WHERE id = $1 FOR UPDATE",
-      [req.user.sub]
-    );
-
-    const count = await client.query(
-      "SELECT COUNT(*)::int AS total FROM wishlist_items WHERE user_id = $1",
-      [req.user.sub]
-    );
-
-    if (count.rows[0].total >= 100) {
-      await client.query("ROLLBACK");
-      return res.status(409).json({
-        error: "Wishlist đã đủ 100 item."
-      });
-    }
-
-    const result = await client.query(
-      `INSERT INTO wishlist_items(user_id, item_id)
-       VALUES($1, $2)
-       ON CONFLICT(user_id, item_id) DO NOTHING
-       RETURNING item_id AS "itemId", created_at AS "createdAt"`,
-      [req.user.sub, itemId]
-    );
-
-    if (!result.rowCount) {
-      await client.query("ROLLBACK");
-      return res.status(409).json({
-        error: "Item đã có trong Wishlist."
-      });
-    }
-
-    await client.query("COMMIT");
-    res.status(201).json({ item: result.rows[0] });
-  } catch (error) {
-    await client.query("ROLLBACK");
-    throw error;
-  } finally {
-    client.release();
-  }
-}));
-
-app.delete(
-  "/api/wishlist/:itemId",
-  authenticate,
-  asyncHandler(async (req, res) => {
-    const { itemId } = req.params;
-
-    if (!validItem(itemId)) {
-      return res.status(400).json({
-        error: "ID item không hợp lệ."
-      });
-    }
-
-    const result = await pool.query(
-      `DELETE FROM wishlist_items
-       WHERE user_id = $1 AND item_id = $2`,
-      [req.user.sub, itemId]
-    );
-
-    if (!result.rowCount) {
-      return res.status(404).json({
-        error: "Không tìm thấy item."
-      });
-    }
-
-    res.json({ ok: true });
-  })
-);
-
-app.delete("/api/wishlist", authenticate, asyncHandler(async (req, res) => {
-  await pool.query(
-    "DELETE FROM wishlist_items WHERE user_id = $1",
-    [req.user.sub]
-  );
-
-  res.json({ ok: true });
-}));
-
-app.use((err, req, res, next) => {
-  if (res.headersSent) return next(err);
-
-  if (err.message === "Origin not allowed") {
-    return res.status(403).json({
-      error: "Origin không được phép."
-    });
-  }
-
-  console.error(err);
-  res.status(500).json({
-    error: "Lỗi máy chủ."
+    ok: true,
+    server: 'wishlist-proxy',
+    version: '1.0.0',
+    upstream: API_BASE,
+    time: new Date().toISOString()
   });
 });
 
-initializeDatabase()
-  .then(() => {
-    app.listen(PORT, "0.0.0.0", () => {
-      console.log(`FF Wishlist API listening on ${PORT}`);
-    });
-  })
-  .catch(error => {
-    console.error("Database initialization failed:", error);
-    process.exit(1);
-  });
+/* =========================================================
+   START
+   ========================================================= */
+
+app.listen(PORT, () => {
+  console.log('');
+  console.log('╔══════════════════════════════════════════════╗');
+  console.log('║  ✅ WISHLIST PROXY ĐANG CHẠY                 ║');
+  console.log('╠══════════════════════════════════════════════╣');
+  console.log(`║  🌐 Mở trình duyệt: http://localhost:${PORT}   ║`);
+  console.log(`║  📡 Upstream: ${API_BASE.slice(0, 30)}...  ║`);
+  console.log('╚══════════════════════════════════════════════╝');
+  console.log('');
+});
