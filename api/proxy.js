@@ -1,28 +1,25 @@
-const {
-  callUpstream, toSafeString, setCors, getBody
-} = require('./_utils');
+const utils = require('./_utils.js');
 
-module.exports = async (req, res) => {
-  setCors(res);
+module.exports = async function handler(req, res) {
+  utils.setCors(res);
   if (req.method === 'OPTIONS') return res.status(200).end();
 
-  const pathname = (req.query.path || '').toString();
+  const pathname = String(req.query.path || '');
   if (!pathname) {
     return res.status(400).json({ ok: false, error: 'Thiếu ?path=' });
   }
 
-  // Gom params (bỏ path)
   const params = {};
-  Object.keys(req.query).forEach(k => {
+  Object.keys(req.query).forEach(function (k) {
     if (k === 'path') return;
     const v = req.query[k];
     params[k] = Array.isArray(v) ? v.join(',') : v;
   });
 
   const method = req.method === 'POST' ? 'POST' : 'GET';
-  const body = method === 'POST' ? getBody(req) : null;
+  const body = method === 'POST' ? utils.getBody(req) : null;
 
-  const result = await callUpstream(pathname, params, method, body);
+  const result = await utils.callUpstream(pathname, params, method, body);
 
   return res.status(result.ok ? 200 : (result.status || 502)).json({
     ok: result.ok,
