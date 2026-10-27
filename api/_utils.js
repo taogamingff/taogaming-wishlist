@@ -1,6 +1,6 @@
+/* Helper dùng chung — file bắt đầu bằng _ nên Vercel KHÔNG tạo route */
 const API_BASE = 'https://danger-wishlist-manager.vercel.app';
 
-/* Chuyển BẤT KỲ giá trị về string an toàn — KHÔNG BAO GIỜ trả [object Object] */
 function toSafeString(v) {
   if (v === null || v === undefined) return '';
   if (typeof v === 'string') return v;
@@ -28,7 +28,7 @@ function setCors(res) {
 function getBody(req) {
   if (!req.body) return {};
   if (typeof req.body === 'string') {
-    try { return JSON.parse(req.body); } catch { return {}; }
+    try { return JSON.parse(req.body); } catch (e) { return {}; }
   }
   return req.body;
 }
@@ -36,13 +36,13 @@ function getBody(req) {
 async function callUpstream(pathname, params, method, body) {
   method = method || 'GET';
   const qs = new URLSearchParams(params || {}).toString();
-  const url = `${API_BASE}${pathname}${qs ? '?' + qs : ''}`;
+  const url = API_BASE + pathname + (qs ? '?' + qs : '');
 
   const opts = {
     method,
     headers: {
       'Accept': 'application/json, text/plain, */*',
-      'User-Agent': 'Mozilla/5.0 WishlistProxy/2.0'
+      'User-Agent': 'Mozilla/5.0 WishlistProxy/3.0'
     }
   };
   if (method === 'POST' && body) {
@@ -51,7 +51,7 @@ async function callUpstream(pathname, params, method, body) {
   }
 
   const ctrl = new AbortController();
-  const timer = setTimeout(() => ctrl.abort(), 12000);
+  const timer = setTimeout(function () { ctrl.abort(); }, 12000);
   opts.signal = ctrl.signal;
 
   try {
@@ -59,7 +59,7 @@ async function callUpstream(pathname, params, method, body) {
     const txt = await r.text();
     clearTimeout(timer);
     let data;
-    try { data = JSON.parse(txt); } catch { data = { raw: txt }; }
+    try { data = JSON.parse(txt); } catch (e) { data = { raw: txt }; }
     return { ok: r.ok, status: r.status, url, data };
   } catch (err) {
     clearTimeout(timer);
@@ -70,7 +70,8 @@ async function callUpstream(pathname, params, method, body) {
 function looksLikeToken(s) {
   if (typeof s !== 'string') return false;
   s = s.trim();
-  if (s.length < 15 || /\s/.test(s)) return false;
+  if (s.length < 15) return false;
+  if (/\s/.test(s)) return false;
   return true;
 }
 
@@ -84,14 +85,14 @@ function extractToken(data) {
   }
   if (typeof data !== 'object') return null;
 
-  const keys = ['token','jwt','access_token','accessToken','id_token','auth','authToken'];
-  for (const k of keys) {
-    if (looksLikeToken(data[k])) return data[k].trim();
+  const keys = ['token', 'jwt', 'access_token', 'accessToken', 'id_token', 'auth', 'authToken'];
+  for (let i = 0; i < keys.length; i++) {
+    if (looksLikeToken(data[keys[i]])) return data[keys[i]].trim();
   }
-  const nested = ['data','result','payload','user','session','auth'];
-  for (const n of nested) {
-    if (data[n] && typeof data[n] === 'object') {
-      const t = extractToken(data[n]);
+  const nested = ['data', 'result', 'payload', 'user', 'session', 'auth'];
+  for (let i = 0; i < nested.length; i++) {
+    if (data[nested[i]] && typeof data[nested[i]] === 'object') {
+      const t = extractToken(data[nested[i]]);
       if (t) return t;
     }
   }
@@ -108,20 +109,21 @@ function extractIds(data) {
   if (data === null || data === undefined) return null;
   if (typeof data === 'string') {
     const m = data.match(/\d{5,12}/g);
-    return m ? [...new Set(m)] : null;
+    return m ? Array.from(new Set(m)) : null;
   }
 
   let arr = null;
   if (Array.isArray(data)) {
     arr = data;
   } else if (typeof data === 'object') {
-    const keys = ['items','wishlist','wish_list','wishlist_items',
-                  'data','list','result','item_ids','itemIds','ids'];
-    for (const k of keys) {
-      if (Array.isArray(data[k])) { arr = data[k]; break; }
+    const keys = ['items', 'wishlist', 'wish_list', 'wishlist_items',
+                  'data', 'list', 'result', 'item_ids', 'itemIds', 'ids'];
+    for (let i = 0; i < keys.length; i++) {
+      if (Array.isArray(data[keys[i]])) { arr = data[keys[i]]; break; }
     }
     if (!arr) {
-      for (const n of ['data','result','payload','wishlist']) {
+      for (let i = 0; i < ['data', 'result', 'payload', 'wishlist'].length; i++) {
+        const n = ['data', 'result', 'payload', 'wishlist'][i];
         if (data[n]) {
           const t = extractIds(data[n]);
           if (t) return t;
@@ -133,18 +135,26 @@ function extractIds(data) {
   if (!arr) return null;
 
   const out = new Set();
-  for (const it of arr) {
+  for (let i = 0; i < arr.length; i++) {
+    const it = arr[i];
     let v = null;
-    if (typeof it === 'string' || typeof it === 'number') v = String(it);
-    else if (it && typeof it === 'object') {
-      v = String(it.item_id ?? it.itemId ?? it.itemid ?? it.itemID ?? it.id ?? it.ID ?? it.item ?? '');
+    if (typeof it === 'string' || typeof it === 'number') {
+      v = String(it);
+    } else if (it && typeof it === 'object') {
+      const cand = it.item_id ?? it.itemId ?? it.itemid ?? it.itemID ?? it.id ?? it.ID ?? it.item;
+      if (cand != null) v = String(cand);
     }
     if (v && /^\d{5,12}$/.test(v)) out.add(v);
   }
-  return [...out];
+  return Array.from(out);
 }
 
 module.exports = {
-  API_BASE, toSafeString, setCors, getBody,
-  callUpstream, extractToken, extractIds
+  API_BASE: API_BASE,
+  toSafeString: toSafeString,
+  setCors: setCors,
+  getBody: getBody,
+  callUpstream: callUpstream,
+  extractToken: extractToken,
+  extractIds: extractIds
 };
