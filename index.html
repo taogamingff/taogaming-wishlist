@@ -1,266 +1,322 @@
+
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản Lý Wishlist Free Fire</title>
-    <style>
-        * { box-sizing: border-box; font-family: 'Segoe UI', Roboto, sans-serif; }
-        body { background: #121212; color: #e0e0e0; margin: 0; padding: 20px; display: flex; justify-content: center; }
-        .container { max-width: 900px; width: 100%; background: #1e1e1e; border-radius: 16px; padding: 24px; box-shadow: 0 8px 24px rgba(0,0,0,0.6); }
-        h1 { color: #ffb74d; margin-top: 0; }
-        .subtitle { color: #9e9e9e; margin-bottom: 24px; font-size: 0.95rem; }
-        .page { display: none; } .page.active { display: block; }
-        .form-group { margin-bottom: 16px; }
-        label { display: block; margin-bottom: 6px; font-weight: 500; color: #b0bec5; }
-        input[type="text"], input[type="password"], input[type="number"] {
-            width: 100%; padding: 12px; border: 1px solid #333; border-radius: 8px;
-            background: #2c2c2c; color: #fff; font-size: 1rem;
-        }
-        input:focus { outline: none; border-color: #ffb74d; }
-        button {
-            background: #ffb74d; color: #121212; border: none; padding: 12px 20px;
-            border-radius: 8px; font-weight: 700; font-size: 1rem; cursor: pointer;
-            transition: background 0.2s; margin-right: 8px; margin-bottom: 8px;
-        }
-        button:hover { background: #ffa726; }
-        button.secondary { background: #546e7a; color: #fff; } button.secondary:hover { background: #607d8b; }
-        button.danger { background: #ef5350; color: #fff; } button.danger:hover { background: #e53935; }
-        .file-upload-box {
-            border: 2px dashed #546e7a; border-radius: 12px; padding: 24px;
-            text-align: center; cursor: pointer; margin-bottom: 16px; background: #252525;
-        }
-        .file-upload-box:hover { border-color: #ffb74d; }
-        .file-info { font-size: 0.9rem; color: #81c784; margin-top: 8px; }
-        .error-msg { color: #ef5350; font-size: 0.9rem; margin-top: 8px; white-space: pre-wrap; }
-        .success-msg { color: #81c784; font-size: 0.9rem; margin-top: 8px; }
-        .wishlist-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; }
-        .wishlist-count { background: #2c2c2c; padding: 8px 16px; border-radius: 20px; font-weight: 600; color: #ffb74d; }
-        .items-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 16px; margin-top: 16px; max-height: 500px; overflow-y: auto; padding: 4px; }
-        .item-card { background: #2c2c2c; border-radius: 12px; padding: 12px; text-align: center; position: relative; border: 1px solid #333; }
-        .item-card img { width: 100%; height: 100px; object-fit: contain; border-radius: 8px; background: #1a1a1a; }
-        .item-id { font-size: 0.8rem; color: #9e9e9e; margin-top: 8px; word-break: break-all; }
-        .btn-remove-item { position: absolute; top: 4px; right: 4px; background: #ef5350; color: white; border: none; border-radius: 50%; width: 24px; height: 24px; font-size: 14px; cursor: pointer; line-height: 1; padding: 0; }
-        .btn-remove-item:hover { background: #e53935; }
-        .empty-msg { color: #757575; text-align: center; padding: 40px 0; grid-column: 1 / -1; }
-        .input-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
-        .input-row input { flex: 1; min-width: 150px; }
-        .hidden { display: none !important; }
-        .info-box { background: #263238; border-left: 4px solid #ffb74d; padding: 12px; border-radius: 8px; font-size: 0.9rem; margin-top: 16px; }
-        .log-box { background: #0d1117; color: #c9d1d9; font-family: 'Consolas', monospace; font-size: 0.8rem; padding: 12px; border-radius: 8px; margin-top: 12px; max-height: 200px; overflow-y: auto; white-space: pre-wrap; word-break: break-all; border: 1px solid #30363d; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#10131d">
+  <title>QUẢN LÝ WISHLIST</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh;
+      background: #10131d; color: #f5f7ff;
+      font-family: system-ui, Arial, sans-serif;
+    }
+    header {
+      padding: 24px 16px; text-align: center;
+      background: #191e2c; border-bottom: 1px solid #30384b;
+    }
+    h1 { margin: 0; font-size: 25px; }
+    header p { color: #aab4c9; margin: 8px 0 0; }
+    main { width: min(900px, 94%); margin: 24px auto; }
+    .panel {
+      padding: 20px; margin-bottom: 18px;
+      background: #191e2c; border: 1px solid #30384b;
+      border-radius: 16px;
+    }
+    h2 { margin-top: 0; font-size: 18px; }
+    label { display: block; margin: 12px 0 6px; color: #c5cde0; }
+    input, button {
+      width: 100%; padding: 12px; border-radius: 9px;
+      font: inherit;
+    }
+    input {
+      color: white; background: #101521;
+      border: 1px solid #414b63; min-width: 0;
+    }
+    button {
+      color: white; background: #635bff;
+      border: 0; cursor: pointer; font-weight: 700;
+    }
+    button:disabled { opacity: .5; cursor: wait; }
+    button.secondary { background: #30394d; }
+    button.danger { background: #b8324b; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .muted { color: #9da8bf; font-size: 13px; }
+    .status { margin-top: 12px; white-space: pre-wrap; overflow-wrap: anywhere; }
+    .items {
+      display: grid; grid-template-columns: repeat(auto-fill,minmax(120px,1fr));
+      gap: 12px; margin-top: 16px;
+    }
+    .item {
+      min-width: 0; text-align: center; padding: 12px 8px;
+      border-radius: 12px; background: #101521;
+      border: 1px solid #30384b;
+    }
+    .item img { width: 76px; height: 76px; object-fit: contain; }
+    .item code { display: block; overflow-wrap: anywhere; margin: 8px 0; }
+    .item button { padding: 8px; font-size: 12px; }
+    .hidden { display: none !important; }
+    @media(max-width: 500px) {
+      .grid { grid-template-columns: 1fr; }
+      .panel { padding: 15px; }
+    }
+  </style>
 </head>
 <body>
-<div class="container">
-    <!-- TRANG 1: ĐĂNG NHẬP -->
-    <div id="page1" class="page active">
-        <h1>🔰 QUẢN LÝ WISHLIST</h1>
-        <p class="subtitle">QUẢN LÝ & THÊM & XÓA WISHLIST - Đăng nhập để bắt đầu.</p>
+<header>
+  <h1>QUẢN LÝ WISHLIST</h1>
+  <p>QUẢN LÝ &amp; THÊM &amp; XÓA WISHLIST</p>
+</header>
 
-        <div class="file-upload-box" id="dropZone">
-            <p>📂 Kéo thả tệp <strong>.dat</strong> vào đây hoặc bấm để chọn</p>
-            <p style="font-size: 0.8rem;">Tự động nhận dạng JSON chứa <code>guest_account_info</code></p>
-            <input type="file" id="fileInput" accept=".dat,.json,.txt" class="hidden">
-        </div>
-        <div id="fileStatus" class="file-info"></div>
-        <div id="fileError" class="error-msg"></div>
+<main>
+  <section id="loginPage" class="panel">
+    <h2>Đăng nhập Wishlist</h2>
+    <p class="muted">Chọn tệp .dat có chứa guest_account_info.</p>
 
-        <div class="form-group">
-            <label for="uidInput">com.garena.msdk.guest_uid</label>
-            <input type="text" id="uidInput" placeholder="VD: 4260182857">
-        </div>
-        <div class="form-group">
-            <label for="passInput">com.garena.msdk.guest_password</label>
-            <input type="password" id="passInput" placeholder="VD: C62FEE6EAC928051FC...">
-        </div>
+    <label for="datFile">Tệp tài khoản (.dat)</label>
+    <input id="datFile" type="file" accept=".dat,.json,.txt,application/json">
 
-        <button id="loginBtn">Đăng nhập Wishlist</button>
-        <div id="loginError" class="error-msg"></div>
+    <label for="uid">Guest UID</label>
+    <input id="uid" autocomplete="off" placeholder="Tự nhận dạng từ tệp">
 
-        <div class="info-box">
-            <strong>💡 Hướng dẫn:</strong> Ứng dụng sẽ gọi API thông qua proxy backend của Vercel để tránh lỗi CORS và 503. Hãy chắc chắn bạn đã triển khai đúng cấu trúc thư mục.
-        </div>
+    <label for="password">Guest Password</label>
+    <input id="password" type="password" autocomplete="off"
+      placeholder="Tự nhận dạng từ tệp">
+
+    <button id="loginBtn" style="margin-top:16px">Tiếp tục</button>
+    <div id="loginStatus" class="status" role="status"></div>
+  </section>
+
+  <section id="wishlistPage" class="hidden">
+    <div class="panel">
+      <h2>Quản lý Wishlist</h2>
+      <p id="accountLabel" class="muted"></p>
+
+      <label for="itemIds">Nhập ID item (mỗi dòng một ID)</label>
+      <input id="itemIds" placeholder="203055024, 203055025">
+
+      <div class="grid" style="margin-top:12px">
+        <button id="addBtn">Thêm</button>
+        <button id="removeBtn" class="danger">Xóa item</button>
+      </div>
+      <button id="refreshBtn" class="secondary" style="margin-top:12px">
+        Tải danh sách
+      </button>
+      <button id="logoutBtn" class="secondary" style="margin-top:8px">
+        Quay lại
+      </button>
+      <div id="apiStatus" class="status" role="status"></div>
     </div>
 
-    <!-- TRANG 2: QUẢN LÝ WISHLIST -->
-    <div id="page2" class="page">
-        <h1>🔰 QUẢN LÝ WISHLIST</h1>
-        <p class="subtitle">QUẢN LÝ & THÊM & XÓA WISHLIST</p>
-
-        <div class="wishlist-header">
-            <div class="wishlist-count" id="wishlistCount">Danh sách mong muốn: 0/100</div>
-            <button class="secondary" id="logoutBtn">Đăng xuất</button>
-        </div>
-
-        <div class="input-row">
-            <input type="number" id="newItemId" placeholder="Nhập ID vật phẩm (VD: 909055018)">
-            <button id="addItemBtn">Thêm</button>
-            <button class="danger" id="clearAllBtn">Xóa tất cả</button>
-        </div>
-
-        <div id="actionStatus" class="success-msg"></div>
-        <div id="actionError" class="error-msg"></div>
-        <div id="logBox" class="log-box hidden"></div>
-
-        <div id="itemsGrid" class="items-grid">
-            <div class="empty-msg">Chưa có vật phẩm nào trong wishlist.</div>
-        </div>
+    <div class="panel">
+      <h2>Danh sách mong muốn <span id="count">0</span>/100</h2>
+      <p class="muted">Ảnh lỗi sẽ được thay bằng thông báo; ID vẫn được giữ.</p>
+      <div id="items" class="items"></div>
+      <p id="empty" class="muted">Chưa có dữ liệu danh sách.</p>
     </div>
-</div>
+  </section>
+</main>
 
-<script>
-// ================== BIẾN TOÀN CỤC ==================
-const PROXY_URL = '/api/proxy'; // Gọi đến backend proxy của Vercel
-const MAX_ITEMS = 100;
-let currentUid = '', currentPassword = '', wishlist = [];
+<script type="module">
+  import { wishlistRequest } from "./api.js";
 
-// DOM
-const $ = id => document.getElementById(id);
-const page1 = $('page1'), page2 = $('page2');
-const fileInput = $('fileInput'), dropZone = $('dropZone');
-const fileStatus = $('fileStatus'), fileError = $('fileError');
-const uidInput = $('uidInput'), passInput = $('passInput');
-const loginBtn = $('loginBtn'), loginError = $('loginError');
-const logoutBtn = $('logoutBtn'), wishlistCount = $('wishlistCount');
-const itemsGrid = $('itemsGrid'), newItemIdInput = $('newItemId');
-const addItemBtn = $('addItemBtn'), clearAllBtn = $('clearAllBtn');
-const actionStatus = $('actionStatus'), actionError = $('actionError');
-const logBox = $('logBox');
+  const $ = id => document.getElementById(id);
+  const state = { uid: "", password: "", items: [] };
 
-// ================== UTILS ==================
-function log(msg) { logBox.classList.remove('hidden'); logBox.textContent += `[${new Date().toLocaleTimeString()}] ${msg}\n`; logBox.scrollTop = logBox.scrollHeight; }
-function clearMessages() { actionStatus.textContent = ''; actionError.textContent = ''; }
-function showError(msg) { clearMessages(); actionError.textContent = '❌ ' + msg; }
-function showSuccess(msg) { clearMessages(); actionStatus.textContent = '✅ ' + msg; }
+  function status(id, message) {
+    $(id).textContent = message;
+  }
 
-// ================== XỬ LÝ TỆP .DAT ==================
-dropZone.addEventListener('click', () => fileInput.click());
-dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.style.borderColor = '#ffb74d'; });
-dropZone.addEventListener('dragleave', () => { dropZone.style.borderColor = '#546e7a'; });
-dropZone.addEventListener('drop', e => { e.preventDefault(); dropZone.style.borderColor = '#546e7a'; if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]); });
-fileInput.addEventListener('change', e => { if (e.target.files[0]) handleFile(e.target.files[0]); });
+  function normalizeId(value) {
+    const id = String(value ?? "").trim();
+    return /^\d{1,20}$/.test(id) ? id : null;
+  }
 
-function handleFile(file) {
-    fileError.textContent = ''; fileStatus.textContent = '';
-    if (!/\.(dat|json|txt)$/i.test(file.name)) { fileError.textContent = 'Vui lòng chọn tệp .dat (hoặc .json/.txt).'; return; }
-    const reader = new FileReader();
-    reader.onload = e => {
-        try {
-            const json = JSON.parse(e.target.result);
-            const guestInfo = json.guest_account_info;
-            if (!guestInfo) throw new Error('Không tìm thấy "guest_account_info" trong tệp.');
-            const uid = guestInfo['com.garena.msdk.guest_uid'];
-            const password = guestInfo['com.garena.msdk.guest_password'];
-            if (!uid || !password) throw new Error('Thiếu UID hoặc Password trong tệp.');
-            uidInput.value = uid; passInput.value = password;
-            fileStatus.textContent = `✅ Đã nhận dạng: UID = ${uid} | Password = ${password.substring(0, 10)}...`;
-        } catch (err) { fileError.textContent = 'Lỗi đọc tệp: ' + err.message; }
-    };
-    reader.readAsText(file);
-}
+  function parseIds(value) {
+    return [...new Set(
+      value.split(/[\s,;]+/).map(normalizeId).filter(Boolean)
+    )];
+  }
 
-// ================== ĐĂNG NHẬP ==================
-loginBtn.addEventListener('click', async () => {
-    loginError.textContent = '';
-    const uid = uidInput.value.trim(), pass = passInput.value.trim();
-    if (!uid || !pass) { loginError.textContent = 'Vui lòng nhập đầy đủ UID và Password (hoặc tải tệp .dat).'; return; }
-    if (uid.length < 5) { loginError.textContent = 'UID không hợp lệ.'; return; }
-    currentUid = uid; currentPassword = pass;
-    page1.classList.remove('active'); page2.classList.add('active');
-    // Tải wishlist từ localStorage (để hiển thị ngay, sau đó có thể đồng bộ từ API)
-    loadWishlistFromStorage();
-    renderWishlist();
-    // (Tuỳ chọn) Gọi API để lấy wishlist thật từ server
-    // await fetchWishlistFromServer();
-});
+  // Hỗ trợ JSON thuần hoặc JSON nằm trong văn bản của tệp.
+  function extractCredentials(text) {
+    const keyUid = "com.garena.msdk.guest_uid";
+    const keyPassword = "com.garena.msdk.guest_password";
 
-logoutBtn.addEventListener('click', () => {
-    page2.classList.remove('active'); page1.classList.add('active');
-    currentUid = ''; currentPassword = ''; uidInput.value = ''; passInput.value = '';
-    fileStatus.textContent = ''; wishlist = []; logBox.textContent = ''; logBox.classList.add('hidden');
-    clearMessages();
-});
+    const candidates = [text];
+    const first = text.indexOf("{");
+    const last = text.lastIndexOf("}");
 
-// ================== STORAGE ==================
-function getStorageKey() { return 'wishlist_' + currentUid; }
-function loadWishlistFromStorage() {
-    const stored = localStorage.getItem(getStorageKey());
-    wishlist = stored ? JSON.parse(stored) : [];
-    if (wishlist.length > MAX_ITEMS) wishlist = wishlist.slice(0, MAX_ITEMS);
-}
-function saveWishlistToStorage() { localStorage.setItem(getStorageKey(), JSON.stringify(wishlist)); }
-
-// ================== THÊM ITEM (GỌI QUA PROXY) ==================
-addItemBtn.addEventListener('click', async () => {
-    clearMessages();
-    const rawId = newItemIdInput.value.trim();
-    if (!rawId) { showError('Vui lòng nhập ID vật phẩm.'); return; }
-    const itemId = rawId.replace(/\D/g, '');
-    if (!itemId) { showError('ID vật phẩm phải là số.'); return; }
-    if (wishlist.includes(itemId)) { showError('Vật phẩm đã có trong wishlist.'); return; }
-    if (wishlist.length >= MAX_ITEMS) { showError(`Đã đạt giới hạn ${MAX_ITEMS} vật phẩm.`); return; }
-
-    log(`📤 Đang gửi yêu cầu THÊM item ${itemId} qua proxy...`);
-    try {
-        const res = await fetch(PROXY_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                uid: currentUid,
-                password: currentPassword,
-                action: 'add',
-                item_id: itemId,
-                items: [...wishlist, itemId]
-            })
-        });
-        log(`📡 Proxy status: ${res.status} ${res.statusText}`);
-        const text = await res.text();
-        log(`📩 Body: ${text.substring(0, 300)}`);
-
-        if (res.status === 503) {
-            log('❌ Proxy trả 503 — server gốc từ chối. Vẫn thêm cục bộ.');
-            wishlist.push(itemId); saveWishlistToStorage(); renderWishlist();
-            newItemIdInput.value = '';
-            showError('API gốc trả 503 — đã thêm cục bộ, chưa đồng bộ lên server.');
-            return;
-        }
-        if (!res.ok) { log(`❌ HTTP ${res.status}`); showError(`Thêm thất bại: Lỗi HTTP ${res.status}`); return; }
-
-        wishlist.push(itemId); saveWishlistToStorage(); renderWishlist();
-        newItemIdInput.value = ''; showSuccess(`Đã thêm item ${itemId} lên server.`);
-    } catch (err) {
-        log('💥 Lỗi fetch: ' + err.message);
-        showError('Lỗi kết nối tới proxy: ' + err.message);
+    if (first >= 0 && last > first) {
+      candidates.push(text.slice(first, last + 1));
     }
-});
 
-// ================== XÓA TẤT CẢ ==================
-clearAllBtn.addEventListener('click', () => {
-    if (wishlist.length === 0) return;
-    if (!confirm('Bạn có chắc muốn xóa toàn bộ wishlist?')) return;
-    wishlist = []; saveWishlistToStorage(); renderWishlist(); showSuccess('Đã xóa toàn bộ wishlist.');
-});
+    for (const candidate of candidates) {
+      try {
+        const obj = JSON.parse(candidate);
+        const info = obj?.guest_account_info ?? obj;
+        if (info[keyUid] && info[keyPassword]) {
+          return {
+            uid: String(info[keyUid]),
+            password: String(info[keyPassword])
+          };
+        }
+      } catch {}
+    }
 
-// ================== HIỂN THỊ ==================
-function renderWishlist() {
-    wishlistCount.textContent = `Danh sách mong muốn: ${wishlist.length}/${MAX_ITEMS}`;
-    if (wishlist.length === 0) { itemsGrid.innerHTML = '<div class="empty-msg">Chưa có vật phẩm nào trong wishlist.</div>'; return; }
-    let html = '';
-    wishlist.forEach(id => {
-        const imgUrl = `https://kingofgames02.github.io/Free-Fire-Items-Library/?item=${id}.png`;
-        html += `<div class="item-card" data-id="${id}"><button class="btn-remove-item" title="Xóa" data-id="${id}">×</button><img src="${imgUrl}" alt="Item ${id}" loading="lazy" onerror="this.style.display='none'; this.parentElement.insertAdjacentHTML('beforeend','<div style=\\'color:#ef5350;font-size:0.8rem;padding:20px 0;\\'>Không tải được ảnh</div>');"><div class="item-id">ID: ${id}</div></div>`;
-    });
-    itemsGrid.innerHTML = html;
-    document.querySelectorAll('.btn-remove-item').forEach(btn => {
-        btn.addEventListener('click', e => { e.stopPropagation(); removeItem(btn.dataset.id); });
-    });
-}
-function removeItem(id) {
-    wishlist = wishlist.filter(x => x !== id); saveWishlistToStorage(); renderWishlist(); showSuccess(`Đã xóa item ${id}.`);
-}
+    // Chỉ dùng biểu thức dự phòng nếu tệp chứa JSON không nguyên vẹn.
+    const uidMatch = text.match(
+      /"com\.garena\.msdk\.guest_uid"\s*:\s*"([^"]+)"/
+    );
+    const passwordMatch = text.match(
+      /"com\.garena\.msdk\.guest_password"\s*:\s*"([^"]+)"/
+    );
 
-// Khởi tạo
-page2.classList.remove('active'); page1.classList.add('active');
+    if (uidMatch && passwordMatch) {
+      return { uid: uidMatch[1], password: passwordMatch[1] };
+    }
+
+    throw new Error("Không tìm thấy đủ UID và Password trong tệp.");
+  }
+
+  $("datFile").addEventListener("change", async event => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    try {
+      if (file.size > 5 * 1024 * 1024) {
+        throw new Error("Tệp vượt quá giới hạn 5 MB.");
+      }
+      const credentials = extractCredentials(await file.text());
+      $("uid").value = credentials.uid;
+      $("password").value = credentials.password;
+      status("loginStatus", "Đã đọc được thông tin từ tệp.");
+    } catch (error) {
+      status("loginStatus", error.message);
+    }
+  });
+
+  function renderItems() {
+    const container = $("items");
+    container.replaceChildren();
+
+    $("count").textContent = state.items.length;
+    $("empty").classList.toggle("hidden", state.items.length > 0);
+
+    for (const id of state.items) {
+      const card = document.createElement("div");
+      card.className = "item";
+
+      const img = document.createElement("img");
+      img.src = `https://kingofgames02.github.io/Free-Fire-Items-Library/ff-icons/${encodeURIComponent(id)}.png`;
+      img.alt = `Item ${id}`;
+      img.loading = "lazy";
+      img.onerror = () => {
+        img.removeAttribute("src");
+        img.alt = "Không tải được ảnh";
+      };
+
+      const code = document.createElement("code");
+      code.textContent = id;
+
+      const remove = document.createElement("button");
+      remove.className = "danger";
+      remove.textContent = "Xóa ID";
+      remove.addEventListener("click", () => {
+        $("itemIds").value = id;
+      });
+
+      card.append(img, code, remove);
+      container.append(card);
+    }
+  }
+
+  async function runApi(action, ids = []) {
+    status("apiStatus", "Đang xử lý...");
+    $("addBtn").disabled = true;
+    $("removeBtn").disabled = true;
+
+    try {
+      const result = await wishlistRequest({
+        uid: state.uid,
+        password: state.password,
+        action,
+        itemIds: ids
+      });
+
+      // Cần điều chỉnh theo schema thực tế mà API trả về.
+      const list = result?.items ?? result?.wishlist ?? result?.data?.items;
+      if (Array.isArray(list)) {
+        state.items = list
+          .map(item => normalizeId(
+            typeof item === "object" ? item.id ?? item.item_id : item
+          ))
+          .filter(Boolean)
+          .slice(0, 100);
+        renderItems();
+      }
+
+      status("apiStatus", result?.message || "API đã phản hồi thành công.");
+      return result;
+    } catch (error) {
+      status("apiStatus", error.message);
+    } finally {
+      $("addBtn").disabled = false;
+      $("removeBtn").disabled = false;
+    }
+  }
+
+  $("loginBtn").addEventListener("click", () => {
+    const uid = $("uid").value.trim();
+    const password = $("password").value.trim();
+
+    if (!uid || !password) {
+      status("loginStatus", "Vui lòng nhập đủ UID và Password.");
+      return;
+    }
+
+    state.uid = uid;
+    state.password = password;
+    $("accountLabel").textContent = `UID: ${uid}`;
+    $("loginPage").classList.add("hidden");
+    $("wishlistPage").classList.remove("hidden");
+    status("loginStatus", "");
+    runApi("list");
+  });
+
+  $("addBtn").addEventListener("click", () => {
+    const ids = parseIds($("itemIds").value);
+    if (!ids.length) {
+      status("apiStatus", "Nhập ít nhất một ID item hợp lệ.");
+      return;
+    }
+    runApi("add", ids);
+  });
+
+  $("removeBtn").addEventListener("click", () => {
+    const ids = parseIds($("itemIds").value);
+    if (!ids.length) {
+      status("apiStatus", "Nhập ID item cần xóa.");
+      return;
+    }
+    runApi("remove", ids);
+  });
+
+  $("refreshBtn").addEventListener("click", () => runApi("list"));
+
+  $("logoutBtn").addEventListener("click", () => {
+    state.uid = "";
+    state.password = "";
+    $("uid").value = "";
+    $("password").value = "";
+    $("datFile").value = "";
+    $("wishlistPage").classList.add("hidden");
+    $("loginPage").classList.remove("hidden");
+  });
+
+  renderItems();
 </script>
 </body>
 </html>
