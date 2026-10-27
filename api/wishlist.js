@@ -1,7 +1,4 @@
-const {
-  callUpstream, extractIds, toSafeString,
-  setCors, getBody
-} = require('./_utils');
+const utils = require('./_utils.js');
 
 const WISHLIST_CANDIDATES = [
   '/get-wishlist', '/get-wish', '/wishlist', '/list-wish',
@@ -9,36 +6,41 @@ const WISHLIST_CANDIDATES = [
   '/user/wishlist', '/me/wishlist', '/get'
 ];
 
-module.exports = async (req, res) => {
-  setCors(res);
+module.exports = async function handler(req, res) {
+  utils.setCors(res);
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') {
     return res.status(405).json({ success: false, error: 'Dùng POST' });
   }
 
-  const body = getBody(req);
-  const token = (body.token || '').toString().trim();
-  const uid = (body.uid || '').toString().trim();
-  const password = (body.password || '').toString().trim();
-  const customEndpoint = (body.customEndpoint || '').toString().trim();
+  const body = utils.getBody(req);
+  const token = String(body.token || '').trim();
+  const uid = String(body.uid || '').trim();
+  const password = String(body.password || '').trim();
+  const customEndpoint = String(body.customEndpoint || '').trim();
 
   let auth;
-  if (token) auth = { token };
-  else if (uid && password) auth = { uid, password };
-  else return res.status(400).json({ success: false, error: 'Cần token hoặc (uid + password)' });
+  if (token) {
+    auth = { token: token };
+  } else if (uid && password) {
+    auth = { uid: uid, password: password };
+  } else {
+    return res.status(400).json({ success: false, error: 'Cần token hoặc (uid + password)' });
+  }
 
   const attempts = [];
   if (customEndpoint) attempts.push(customEndpoint);
-  attempts.push(...WISHLIST_CANDIDATES);
+  for (let i = 0; i < WISHLIST_CANDIDATES.length; i++) attempts.push(WISHLIST_CANDIDATES[i]);
 
   const results = [];
 
-  for (const pathname of attempts) {
-    const r = await callUpstream(pathname, auth, 'GET');
+  for (let i = 0; i < attempts.length; i++) {
+    const pathname = attempts[i];
+    const r = await utils.callUpstream(pathname, auth, 'GET');
     results.push({ path: pathname, status: r.status, ok: r.ok });
 
     if (r.ok) {
-      const ids = extractIds(r.data);
+      const ids = utils.extractIds(r.data);
       if (ids !== null) {
         return res.json({
           success: true,
