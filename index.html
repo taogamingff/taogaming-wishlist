@@ -1,322 +1,132 @@
-
-<!DOCTYPE html>
+<!doctype html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#10131d">
-  <title>QUẢN LÝ WISHLIST</title>
-  <style>
-    * { box-sizing: border-box; }
-    body {
-      margin: 0; min-height: 100vh;
-      background: #10131d; color: #f5f7ff;
-      font-family: system-ui, Arial, sans-serif;
-    }
-    header {
-      padding: 24px 16px; text-align: center;
-      background: #191e2c; border-bottom: 1px solid #30384b;
-    }
-    h1 { margin: 0; font-size: 25px; }
-    header p { color: #aab4c9; margin: 8px 0 0; }
-    main { width: min(900px, 94%); margin: 24px auto; }
-    .panel {
-      padding: 20px; margin-bottom: 18px;
-      background: #191e2c; border: 1px solid #30384b;
-      border-radius: 16px;
-    }
-    h2 { margin-top: 0; font-size: 18px; }
-    label { display: block; margin: 12px 0 6px; color: #c5cde0; }
-    input, button {
-      width: 100%; padding: 12px; border-radius: 9px;
-      font: inherit;
-    }
-    input {
-      color: white; background: #101521;
-      border: 1px solid #414b63; min-width: 0;
-    }
-    button {
-      color: white; background: #635bff;
-      border: 0; cursor: pointer; font-weight: 700;
-    }
-    button:disabled { opacity: .5; cursor: wait; }
-    button.secondary { background: #30394d; }
-    button.danger { background: #b8324b; }
-    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .muted { color: #9da8bf; font-size: 13px; }
-    .status { margin-top: 12px; white-space: pre-wrap; overflow-wrap: anywhere; }
-    .items {
-      display: grid; grid-template-columns: repeat(auto-fill,minmax(120px,1fr));
-      gap: 12px; margin-top: 16px;
-    }
-    .item {
-      min-width: 0; text-align: center; padding: 12px 8px;
-      border-radius: 12px; background: #101521;
-      border: 1px solid #30384b;
-    }
-    .item img { width: 76px; height: 76px; object-fit: contain; }
-    .item code { display: block; overflow-wrap: anywhere; margin: 8px 0; }
-    .item button { padding: 8px; font-size: 12px; }
-    .hidden { display: none !important; }
-    @media(max-width: 500px) {
-      .grid { grid-template-columns: 1fr; }
-      .panel { padding: 15px; }
-    }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#090909">
+<title>QUẢN LÝ WISHLIST | FREE FIRE</title>
+<style>
+:root{color-scheme:dark;--bg:#090909;--panel:#131313;--panel2:#1b1b1b;--gold:#f4c542;--gold-d:#8f6a16;--line:#333;--muted:#a5a5a5;--white:#f5f5f5}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% -20%,#3b2d0b 0,transparent 42%),var(--bg);color:var(--white);font:15px/1.5 system-ui,-apple-system,Segoe UI,Arial,sans-serif}
+header{position:sticky;top:0;z-index:10;background:#090909ed;border-bottom:1px solid #57451b;backdrop-filter:blur(12px)}
+.top{max-width:1250px;margin:auto;padding:15px 20px;display:flex;align-items:center;justify-content:space-between;gap:15px}
+.brand{font-weight:950;letter-spacing:1.5px;color:var(--gold)}.brand small{display:block;color:#aaa;font-size:10px;letter-spacing:3px}
+.pill{border:1px solid var(--gold-d);border-radius:99px;padding:5px 12px;color:var(--gold);font-size:12px}
+main{max-width:1250px;margin:30px auto;padding:0 18px}.hero{display:flex;justify-content:space-between;align-items:end;gap:15px;margin-bottom:22px}
+h1{font-size:clamp(25px,4vw,39px);line-height:1.1;margin:0}.muted{color:var(--muted)}.hero p{margin:8px 0 0}
+.toolbar{display:grid;grid-template-columns:minmax(180px,1fr) 190px 160px auto;gap:10px;padding:12px;background:var(--panel);border:1px solid var(--line);border-radius:14px;margin-bottom:18px}
+input,select,button{font:inherit}input,select{min-width:0;background:#090909;color:white;border:1px solid #414141;border-radius:9px;padding:11px 12px;outline:none}
+input:focus,select:focus{border-color:var(--gold)}button{cursor:pointer;border-radius:9px;padding:9px 13px;font-weight:800}
+.primary{background:var(--gold);color:#171207;border:1px solid var(--gold)}.secondary{background:#252525;color:#fff;border:1px solid #484848}.danger{background:#351c1b;color:#ffc1b8;border:1px solid #63332d}
+button:disabled{opacity:.55;cursor:default}.layout{display:grid;grid-template-columns:minmax(0,1fr) 310px;gap:18px;align-items:start}
+.section-head{display:flex;justify-content:space-between;align-items:center;margin:0 0 12px}h2{font-size:16px;margin:0}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:12px}
+.item{background:linear-gradient(145deg,#1c1c1c,#101010);border:1px solid var(--line);border-radius:12px;padding:11px;min-width:0;transition:transform .15s,border-color .15s}
+.item:hover{transform:translateY(-2px);border-color:#8d6b20}.item img{width:100%;height:112px;object-fit:contain;background:#090909;border-radius:8px;margin-bottom:8px}
+.item-name{font-size:13px;font-weight:800;min-height:39px;overflow-wrap:anywhere}.rare{font-size:11px;color:var(--gold);min-height:17px;margin:4px 0 9px}.item button{width:100%;font-size:12px;padding:8px}
+.side{position:sticky;top:83px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:15px}
+.wish-list{display:grid;gap:8px;margin-top:12px}.wish-row{display:flex;align-items:center;gap:9px;padding:8px;background:#0a0a0a;border:1px solid #303030;border-radius:9px}
+.wish-row img{width:42px;height:42px;object-fit:contain}.wish-row .name{font-size:12px;flex:1;overflow-wrap:anywhere}.wish-row button{font-size:11px;padding:5px 8px}
+.empty,.status{color:#929292;text-align:center;padding:24px 8px;border:1px dashed #444;border-radius:10px;font-size:13px}
+.side-actions{display:flex;gap:8px;margin-top:12px}.side-actions button{flex:1;font-size:12px}
+.notice{font-size:11px;color:#999;border-top:1px solid var(--line);padding-top:12px;margin:14px 0 0}
+#toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#242424;border:1px solid #70571d;color:#ffe08a;padding:10px 16px;border-radius:10px;display:none;z-index:20;max-width:90%;text-align:center}
+footer{max-width:1250px;margin:35px auto 20px;padding:0 18px;text-align:center;color:#666;font-size:11px}
+@media(max-width:850px){.layout{grid-template-columns:1fr}.side{position:static}.toolbar{grid-template-columns:1fr 1fr}.hero{align-items:start;flex-direction:column}}
+@media(max-width:470px){.toolbar{grid-template-columns:1fr}.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.top{padding:12px 15px}}
+</style>
 </head>
 <body>
-<header>
-  <h1>QUẢN LÝ WISHLIST</h1>
-  <p>QUẢN LÝ &amp; THÊM &amp; XÓA WISHLIST</p>
-</header>
-
+<header><div class="top"><div class="brand">WISHLIST MANAGER<small>FREE FIRE ITEM COLLECTION</small></div><div class="pill" id="version">VERSION …</div></div></header>
 <main>
-  <section id="loginPage" class="panel">
-    <h2>Đăng nhập Wishlist</h2>
-    <p class="muted">Chọn tệp .dat có chứa guest_account_info.</p>
-
-    <label for="datFile">Tệp tài khoản (.dat)</label>
-    <input id="datFile" type="file" accept=".dat,.json,.txt,application/json">
-
-    <label for="uid">Guest UID</label>
-    <input id="uid" autocomplete="off" placeholder="Tự nhận dạng từ tệp">
-
-    <label for="password">Guest Password</label>
-    <input id="password" type="password" autocomplete="off"
-      placeholder="Tự nhận dạng từ tệp">
-
-    <button id="loginBtn" style="margin-top:16px">Tiếp tục</button>
-    <div id="loginStatus" class="status" role="status"></div>
-  </section>
-
-  <section id="wishlistPage" class="hidden">
-    <div class="panel">
-      <h2>Quản lý Wishlist</h2>
-      <p id="accountLabel" class="muted"></p>
-
-      <label for="itemIds">Nhập ID item (mỗi dòng một ID)</label>
-      <input id="itemIds" placeholder="203055024, 203055025">
-
-      <div class="grid" style="margin-top:12px">
-        <button id="addBtn">Thêm</button>
-        <button id="removeBtn" class="danger">Xóa item</button>
-      </div>
-      <button id="refreshBtn" class="secondary" style="margin-top:12px">
-        Tải danh sách
-      </button>
-      <button id="logoutBtn" class="secondary" style="margin-top:8px">
-        Quay lại
-      </button>
-      <div id="apiStatus" class="status" role="status"></div>
-    </div>
-
-    <div class="panel">
-      <h2>Danh sách mong muốn <span id="count">0</span>/100</h2>
-      <p class="muted">Ảnh lỗi sẽ được thay bằng thông báo; ID vẫn được giữ.</p>
-      <div id="items" class="items"></div>
-      <p id="empty" class="muted">Chưa có dữ liệu danh sách.</p>
-    </div>
-  </section>
+<section class="hero"><div><h1>QUẢN LÝ WISHLIST</h1><p class="muted">Tìm kiếm, sưu tầm và quản lý vật phẩm Free Fire bạn yêu thích.</p></div><div class="pill" id="total">Đang tải dữ liệu…</div></section>
+<section class="toolbar">
+<input id="search" type="search" placeholder="Tìm theo tên hoặc ID…">
+<select id="rarity"><option value="">Tất cả độ hiếm</option></select>
+<select id="sort"><option value="name">Tên A → Z</option><option value="id">ID tăng dần</option></select>
+<button class="secondary" id="reload">↻ Tải lại</button>
+</section>
+<div class="layout">
+<section><div class="section-head"><h2>KHO VẬT PHẨM</h2><span class="muted" id="resultCount"></span></div><div class="grid" id="catalog"><div class="status">Đang kết nối API…</div></div></section>
+<aside class="side">
+<div class="section-head"><h2>WISHLIST CỦA TÔI</h2><span class="pill" id="wishCount">0</span></div>
+<div class="wish-list" id="wishlist"><div class="empty">Wishlist đang trống.<br>Hãy thêm vật phẩm từ kho.</div></div>
+<div class="side-actions"><button class="secondary" id="export">Xuất JSON</button><button class="danger" id="clear">Xóa tất cả</button></div>
+<p class="notice">Danh sách được lưu trong LocalStorage của trình duyệt này. Dữ liệu không tự đồng bộ sang thiết bị khác. Không cần đăng nhập game hoặc cung cấp mật khẩu.</p>
+</aside>
+</div>
 </main>
-
-<script type="module">
-  import { wishlistRequest } from "./api.js";
-
-  const $ = id => document.getElementById(id);
-  const state = { uid: "", password: "", items: [] };
-
-  function status(id, message) {
-    $(id).textContent = message;
-  }
-
-  function normalizeId(value) {
-    const id = String(value ?? "").trim();
-    return /^\d{1,20}$/.test(id) ? id : null;
-  }
-
-  function parseIds(value) {
-    return [...new Set(
-      value.split(/[\s,;]+/).map(normalizeId).filter(Boolean)
-    )];
-  }
-
-  // Hỗ trợ JSON thuần hoặc JSON nằm trong văn bản của tệp.
-  function extractCredentials(text) {
-    const keyUid = "com.garena.msdk.guest_uid";
-    const keyPassword = "com.garena.msdk.guest_password";
-
-    const candidates = [text];
-    const first = text.indexOf("{");
-    const last = text.lastIndexOf("}");
-
-    if (first >= 0 && last > first) {
-      candidates.push(text.slice(first, last + 1));
-    }
-
-    for (const candidate of candidates) {
-      try {
-        const obj = JSON.parse(candidate);
-        const info = obj?.guest_account_info ?? obj;
-        if (info[keyUid] && info[keyPassword]) {
-          return {
-            uid: String(info[keyUid]),
-            password: String(info[keyPassword])
-          };
-        }
-      } catch {}
-    }
-
-    // Chỉ dùng biểu thức dự phòng nếu tệp chứa JSON không nguyên vẹn.
-    const uidMatch = text.match(
-      /"com\.garena\.msdk\.guest_uid"\s*:\s*"([^"]+)"/
-    );
-    const passwordMatch = text.match(
-      /"com\.garena\.msdk\.guest_password"\s*:\s*"([^"]+)"/
-    );
-
-    if (uidMatch && passwordMatch) {
-      return { uid: uidMatch[1], password: passwordMatch[1] };
-    }
-
-    throw new Error("Không tìm thấy đủ UID và Password trong tệp.");
-  }
-
-  $("datFile").addEventListener("change", async event => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    try {
-      if (file.size > 5 * 1024 * 1024) {
-        throw new Error("Tệp vượt quá giới hạn 5 MB.");
-      }
-      const credentials = extractCredentials(await file.text());
-      $("uid").value = credentials.uid;
-      $("password").value = credentials.password;
-      status("loginStatus", "Đã đọc được thông tin từ tệp.");
-    } catch (error) {
-      status("loginStatus", error.message);
-    }
-  });
-
-  function renderItems() {
-    const container = $("items");
-    container.replaceChildren();
-
-    $("count").textContent = state.items.length;
-    $("empty").classList.toggle("hidden", state.items.length > 0);
-
-    for (const id of state.items) {
-      const card = document.createElement("div");
-      card.className = "item";
-
-      const img = document.createElement("img");
-      img.src = `https://kingofgames02.github.io/Free-Fire-Items-Library/ff-icons/${encodeURIComponent(id)}.png`;
-      img.alt = `Item ${id}`;
-      img.loading = "lazy";
-      img.onerror = () => {
-        img.removeAttribute("src");
-        img.alt = "Không tải được ảnh";
-      };
-
-      const code = document.createElement("code");
-      code.textContent = id;
-
-      const remove = document.createElement("button");
-      remove.className = "danger";
-      remove.textContent = "Xóa ID";
-      remove.addEventListener("click", () => {
-        $("itemIds").value = id;
-      });
-
-      card.append(img, code, remove);
-      container.append(card);
-    }
-  }
-
-  async function runApi(action, ids = []) {
-    status("apiStatus", "Đang xử lý...");
-    $("addBtn").disabled = true;
-    $("removeBtn").disabled = true;
-
-    try {
-      const result = await wishlistRequest({
-        uid: state.uid,
-        password: state.password,
-        action,
-        itemIds: ids
-      });
-
-      // Cần điều chỉnh theo schema thực tế mà API trả về.
-      const list = result?.items ?? result?.wishlist ?? result?.data?.items;
-      if (Array.isArray(list)) {
-        state.items = list
-          .map(item => normalizeId(
-            typeof item === "object" ? item.id ?? item.item_id : item
-          ))
-          .filter(Boolean)
-          .slice(0, 100);
-        renderItems();
-      }
-
-      status("apiStatus", result?.message || "API đã phản hồi thành công.");
-      return result;
-    } catch (error) {
-      status("apiStatus", error.message);
-    } finally {
-      $("addBtn").disabled = false;
-      $("removeBtn").disabled = false;
-    }
-  }
-
-  $("loginBtn").addEventListener("click", () => {
-    const uid = $("uid").value.trim();
-    const password = $("password").value.trim();
-
-    if (!uid || !password) {
-      status("loginStatus", "Vui lòng nhập đủ UID và Password.");
-      return;
-    }
-
-    state.uid = uid;
-    state.password = password;
-    $("accountLabel").textContent = `UID: ${uid}`;
-    $("loginPage").classList.add("hidden");
-    $("wishlistPage").classList.remove("hidden");
-    status("loginStatus", "");
-    runApi("list");
-  });
-
-  $("addBtn").addEventListener("click", () => {
-    const ids = parseIds($("itemIds").value);
-    if (!ids.length) {
-      status("apiStatus", "Nhập ít nhất một ID item hợp lệ.");
-      return;
-    }
-    runApi("add", ids);
-  });
-
-  $("removeBtn").addEventListener("click", () => {
-    const ids = parseIds($("itemIds").value);
-    if (!ids.length) {
-      status("apiStatus", "Nhập ID item cần xóa.");
-      return;
-    }
-    runApi("remove", ids);
-  });
-
-  $("refreshBtn").addEventListener("click", () => runApi("list"));
-
-  $("logoutBtn").addEventListener("click", () => {
-    state.uid = "";
-    state.password = "";
-    $("uid").value = "";
-    $("password").value = "";
-    $("datFile").value = "";
-    $("wishlistPage").classList.add("hidden");
-    $("loginPage").classList.remove("hidden");
-  });
-
-  renderItems();
+<div id="toast" role="status"></div>
+<footer>Fan-made utility · Không liên kết hoặc được Garena / Free Fire bảo trợ.</footer>
+<script>
+"use strict";
+const API="/api/Wishlist";
+const KEY="ff_wishlist_manager_v2";
+let catalog={};
+let wishlist=loadSaved();
+let toastTimer;
+function loadSaved(){try{const v=JSON.parse(localStorage.getItem(KEY)||"[]");return Array.isArray(v)?v:[]}catch{return []}}
+function save(){localStorage.setItem(KEY,JSON.stringify(wishlist));renderWishlist();showToast("Đã lưu wishlist trên trình duyệt.");}
+function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function entries(){return Object.entries(catalog).map(([id,item])=>({id:String(id),...(item&&typeof item==="object"?item:{})}))}
+function toast(msg){const el=document.getElementById("toast");el.textContent=msg;el.style.display="block";clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.style.display="none",2600)}
+async function load(){
+ const target=document.getElementById("catalog");target.innerHTML='<div class="status">Đang tải danh mục…</div>';
+ try{
+  const [a,b]=await Promise.all([fetch(API+"?type=catalog"),fetch(API+"?type=version")]);
+  if(!a.ok)throw Error("Catalog HTTP "+a.status);
+  const data=await a.json();if(!data||Array.isArray(data)||typeof data!=="object")throw Error("Dữ liệu danh mục không hợp lệ");
+  catalog=data;
+  if(b.ok){const ver=await b.json();document.getElementById("version").textContent="VERSION "+(ver.version||"—")}
+  document.getElementById("total").textContent=entries().length.toLocaleString("vi-VN")+" vật phẩm";
+  fillRarity();renderItems();
+ }catch(e){target.innerHTML='<div class="status">Không thể tải dữ liệu: '+esc(e.message)+'<br>Kiểm tra kết nối hoặc thử tải lại.</div>';document.getElementById("total").textContent="Lỗi API"}
+}
+function fillRarity(){
+ const sel=document.getElementById("rarity"),old=sel.value;
+ const values=[...new Set(entries().map(x=>x.rare).filter(x=>x!==null&&x!==undefined&&String(x)!=="").map(String))].sort((a,b)=>a.localeCompare(b));
+ sel.innerHTML='<option value="">Tất cả độ hiếm</option>'+values.map(x=>'<option value="'+esc(x)+'">'+esc(x)+'</option>').join("");
+ if(values.includes(old))sel.value=old;
+}
+function renderItems(){
+ const q=document.getElementById("search").value.trim().toLocaleLowerCase(),r=document.getElementById("rarity").value;
+ let data=entries().filter(x=>(!r||String(x.rare)===r)&&(!q||x.id.toLowerCase().includes(q)||String(x.name||"").toLocaleLowerCase().includes(q)));
+ if(document.getElementById("sort").value==="id")data.sort((a,b)=>a.id.localeCompare(b.id,undefined,{numeric:true}));
+ else data.sort((a,b)=>String(a.name||a.id).localeCompare(String(b.name||b.id),"vi"));
+ document.getElementById("resultCount").textContent=data.length.toLocaleString("vi-VN")+" kết quả";
+ const root=document.getElementById("catalog");
+ if(!data.length){root.innerHTML='<div class="status">Không tìm thấy vật phẩm.</div>';return}
+ root.innerHTML=data.map(x=>{
+  const added=wishlist.some(w=>w.id===x.id);
+  return '<article class="item"><img loading="lazy" src="'+esc(x.icon||"")+'" alt="" onerror="this.style.visibility=\'hidden\'"><div class="item-name">'+esc(x.name||("Item "+x.id))+'</div><div class="rare">'+esc(x.rare||"")+'</div><button class="'+(added?"secondary":"primary")+'" data-add="'+esc(x.id)+'" '+(added?"disabled":"")+'>'+(added?"Đã thêm":"＋ Thêm vào wishlist")+'</button></article>';
+ }).join("");
+}
+function renderWishlist(){
+ document.getElementById("wishCount").textContent=wishlist.length;
+ const root=document.getElementById("wishlist");
+ if(!wishlist.length){root.innerHTML='<div class="empty">Wishlist đang trống.<br>Hãy thêm vật phẩm từ kho.</div>'}
+ else root.innerHTML=wishlist.map(x=>'<div class="wish-row"><img src="'+esc(x.icon||"")+'" alt="" onerror="this.style.visibility=\'hidden\'"><div class="name">'+esc(x.name)+'<br><span class="muted">ID: '+esc(x.id)+'</span></div><button class="danger" data-remove="'+esc(x.id)+'">Xóa</button></div>').join("");
+ renderItems();
+}
+document.getElementById("catalog").addEventListener("click",e=>{
+ const id=e.target.closest("[data-add]")?.dataset.add;if(!id)return;
+ const x=entries().find(v=>v.id===id);if(!x||wishlist.some(v=>v.id===id))return;
+ wishlist.push({id:x.id,name:x.name||("Item "+id),rare:x.rare||"",icon:x.icon||""});save();
+});
+document.getElementById("wishlist").addEventListener("click",e=>{
+ const id=e.target.closest("[data-remove]")?.dataset.remove;if(!id)return;
+ wishlist=wishlist.filter(x=>x.id!==id);save();
+});
+document.getElementById("search").addEventListener("input",renderItems);
+document.getElementById("rarity").addEventListener("change",renderItems);
+document.getElementById("sort").addEventListener("change",renderItems);
+document.getElementById("reload").addEventListener("click",load);
+document.getElementById("clear").addEventListener("click",()=>{if(wishlist.length&&confirm("Bạn có chắc muốn xóa toàn bộ wishlist?")){wishlist=[];save()}});
+document.getElementById("export").addEventListener("click",()=>{
+ const blob=new Blob([JSON.stringify({exportedAt:new Date().toISOString(),items:wishlist},null,2)],{type:"application/json"});
+ const url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="freefire-wishlist.json";a.click();URL.revokeObjectURL(url);
+});
+renderWishlist();load();
 </script>
 </body>
 </html>
