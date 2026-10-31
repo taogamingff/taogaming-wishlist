@@ -1,14 +1,10 @@
-
 {
-  "name": "wishlist-manager",
+  "name": "freefire-wishlist-manager",
   "version": "1.0.0",
   "private": true,
-  "description": "Wishlist management interface",
   "type": "module",
   "scripts": {
-    "start": "npx serve ."
-  },
-  "devDependencies": {
-    "serve": "^14.2.4"
+    "dev": "vercel dev",
+    "start": "vercel dev"
   }
 }
